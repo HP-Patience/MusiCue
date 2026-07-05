@@ -449,25 +449,10 @@ export function init() {
     } catch { /* ignore */ }
   });
 
-  dom.hideBtn.addEventListener('click', async () => {
-    const track = state.currentTrack;
-    if (!track || !track.songId) return;
-    try {
-      await fetch('/api/hide', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          songId: track.songId, name: track.name, artist: track.artist,
-          scene: state._currentScene || 'unknown', sessionId,
-        }),
-      });
-    } catch { /* ignore */ }
-    if (state.queue.length > 1) await nextTrack();
-  });
-
   dom.similarBtn.addEventListener('click', async () => {
     const track = state.currentTrack;
     if (!track || !track.songId) { showModeToast('请先播放一首歌'); return; }
+    const label = dom.similarBtn.innerHTML;
     dom.similarBtn.disabled = true;
     dom.similarBtn.textContent = '…';
     try {
@@ -484,6 +469,6 @@ export function init() {
       setQueue(state.queue);
       showModeToast(`已添加 ${songs.length} 首相似歌曲`);
     } catch { showModeToast('获取相似歌曲失败'); }
-    finally { dom.similarBtn.textContent = '相似'; dom.similarBtn.disabled = false; }
+    finally { dom.similarBtn.innerHTML = label; dom.similarBtn.disabled = false; }
   });
 }

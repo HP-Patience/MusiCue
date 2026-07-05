@@ -102,6 +102,66 @@ describe('frontend polish', () => {
     expect(source).toContain("cache: 'no-store'");
   });
 
+  it('keeps window controls inline and disables progress hover resizing', () => {
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+
+    expect(css).toMatch(/\.nav-actions\s*\{[\s\S]*display:\s*flex;[\s\S]*align-items:\s*center;[\s\S]*gap:\s*8px;/);
+    const progressHover = css.slice(css.indexOf('.progress-container:hover'), css.indexOf('.typing-dots'));
+    expect(progressHover).toContain('cursor: pointer');
+    expect(progressHover).not.toContain('height:');
+  });
+
+  it('stacks settings toggles under their labels and closes after save', () => {
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+    const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
+    const settings = fs.readFileSync(path.resolve('frontend/js/settings.js'), 'utf-8');
+
+    expect(css).toMatch(/\.toggle-group\s*\{[\s\S]*align-items:\s*flex-start;[\s\S]*gap:\s*8px;/);
+    expect(css).toMatch(/\.toggle-switch\s*\{[\s\S]*width:\s*42px;[\s\S]*height:\s*24px;/);
+    expect(html).not.toContain('class="form-group toggle-group" style="margin-top:8px"');
+    expect(settings).toContain('closeSettings();');
+    expect(settings).toContain('syncDesktopConfig');
+    expect(settings).toContain('setShortcut');
+    expect(settings).toContain('setAutoLaunch');
+    expect(settings).not.toContain("dom.settingsStatus.textContent = '✓ 已保存'");
+  });
+
+  it('uses generated brand icons for app, tray, and navbar', () => {
+    const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+    const main = fs.readFileSync(path.resolve('electron/main.ts'), 'utf-8');
+
+    expect(fs.existsSync(path.resolve('frontend/icons/icon-512.png'))).toBe(true);
+    expect(fs.existsSync(path.resolve('frontend/icons/tray-icon.png'))).toBe(true);
+    expect(fs.existsSync(path.resolve('frontend/icons/nav-logo.png'))).toBe(true);
+    expect(html).toContain('/icons/nav-logo.png');
+    expect(css).toContain('.nav-avatar img');
+    expect(main).toContain("'tray-icon.png'");
+  });
+
+  it('defines quick input floating bar and reuses chat submission', () => {
+    const html = fs.readFileSync(path.resolve('frontend/quick-input.html'), 'utf-8');
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+    const quickInput = fs.readFileSync(path.resolve('frontend/js/quick-input.js'), 'utf-8');
+    const main = fs.readFileSync(path.resolve('frontend/js/main.js'), 'utf-8');
+
+    expect(html).toContain('id="quick-input"');
+    expect(html).toContain('What can I help you with today?');
+    expect(css).toContain('.quick-input-bar');
+    expect(css).toContain('background: #ffffff');
+    expect(css).toContain('border-radius: 999px');
+    expect(css).toContain('.quick-input-field::placeholder');
+    expect(css).toContain('color: var(--orange)');
+    expect(quickInput).toContain('window.electronQuickInput');
+    expect(quickInput).toContain("event.key === 'Enter'");
+    expect(quickInput).toContain("event.key === 'Escape'");
+    expect(quickInput).toContain('event.isComposing');
+    expect(quickInput).toContain('quickInput?.submit(text)');
+    expect(quickInput).toContain('quickInput?.close()');
+    expect(main).toContain('electronQuickInput?.onSubmit');
+    expect(main).toContain('chat.sendChat(text)');
+  });
+
   it('FM next playback uses the shared playTrack path', () => {
     const source = fs.readFileSync(path.resolve('frontend/js/audio-core.js'), 'utf-8');
     const fmStart = source.indexOf('async function fetchNextFm()');

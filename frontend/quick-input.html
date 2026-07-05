@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claudio Quick Input</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Unbounded:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="quick-input-body">
+  <main class="quick-input-shell" role="dialog" aria-label="Claudio quick input">
+    <div class="quick-input-bar">
+      <div class="quick-input-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" focusable="false">
+          <path d="M16 2l2.4 9.6L28 16l-9.6 4.4L16 30l-2.4-9.6L4 16l9.6-4.4L16 2z" />
+          <path d="M24 4l.9 3.1L28 8l-3.1.9L24 12l-.9-3.1L20 8l3.1-.9L24 4z" />
+        </svg>
+      </div>
+      <input
+        id="quick-input"
+        class="quick-input-field"
+        type="text"
+        placeholder="What can I help you with today?"
+        autocomplete="off"
+        spellcheck="true"
+      />
+    </div>
+  </main>
+  <script type="module" src="/js/quick-input.js"></script>
+</body>
+</html>

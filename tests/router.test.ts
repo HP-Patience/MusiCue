@@ -166,12 +166,36 @@ describe('router', () => {
 
   describe('API config', () => {
     it('returns scene suggestion toggle state', async () => {
-      vi.mocked(getPref).mockImplementation((_db, key) => key === 'scene_suggestions_enabled' ? 'false' : null);
+      vi.mocked(getPref).mockImplementation((_db, key) => {
+        if (key === 'scene_suggestions_enabled') return 'false';
+        if (key === 'quick_input_shortcut') return 'Alt+Space';
+        if (key === 'auto_launch_enabled') return 'false';
+        return null;
+      });
 
       const res = await request(app).get('/api/config');
 
       expect(res.status).toBe(200);
       expect(res.body.sceneSuggestionsEnabled).toBe(false);
+      expect(res.body.quickInputShortcut).toBe('Alt+Space');
+      expect(res.body.autoLaunchEnabled).toBe(false);
+    });
+
+    it('persists disabled LLM and scene suggestion toggles', async () => {
+      const res = await request(app)
+        .post('/api/config')
+        .send({
+          llmEnabled: false,
+          sceneSuggestionsEnabled: false,
+          quickInputShortcut: 'Alt+Space',
+          autoLaunchEnabled: false,
+        });
+
+      expect(res.status).toBe(200);
+      expect(setPref).toHaveBeenCalledWith(expect.anything(), 'llm_enabled', 'false');
+      expect(setPref).toHaveBeenCalledWith(expect.anything(), 'scene_suggestions_enabled', 'false');
+      expect(setPref).toHaveBeenCalledWith(expect.anything(), 'quick_input_shortcut', 'Alt+Space');
+      expect(setPref).toHaveBeenCalledWith(expect.anything(), 'auto_launch_enabled', 'false');
     });
 
     it('writes config env file inside CLAUDIO_DATA_DIR', async () => {

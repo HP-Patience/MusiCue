@@ -38,6 +38,7 @@
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
+      "electron/preload.cjs",
       "frontend/**/*",
       "prompts/**/*",
       "package.json"

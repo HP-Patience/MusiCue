@@ -1,4 +1,4 @@
-const CACHE_NAME = 'claudio-fm-v1';
+const CACHE_NAME = 'claudio-fm-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

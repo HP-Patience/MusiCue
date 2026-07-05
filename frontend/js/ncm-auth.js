@@ -16,6 +16,21 @@ export function updateLoginBtn() {
   }
 }
 
+export async function refreshNcmLoginStatus() {
+  try {
+    const res = await fetch('/api/ncm/login/status');
+    const data = await res.json();
+    state.ncmLoggedIn = !!data.loggedIn;
+    state.ncmVipType = data.vipType || 0;
+    state.ncmNickname = data.nickname || '';
+  } catch {
+    state.ncmLoggedIn = false;
+    state.ncmVipType = 0;
+    state.ncmNickname = '';
+  }
+  updateLoginBtn();
+}
+
 export function closeNcmLogin() {
   dom.ncmLoginModal.classList.remove('open');
   if (qrPollTimer) { clearInterval(qrPollTimer); qrPollTimer = null; }
@@ -60,11 +75,7 @@ async function startQrLogin() {
           dom.qrStatus.className = 'login-status success';
           state.ncmLoggedIn = true;
           updateLoginBtn();
-          fetch('/api/ncm/login/status').then(r => r.json()).then(d => {
-            state.ncmVipType = d.vipType || 0;
-            state.ncmNickname = d.nickname || '';
-            updateLoginBtn();
-          }).catch(() => {});
+          refreshNcmLoginStatus();
           import('./chat.js').then(m => m.addChatMessage('✓ 网易云登录成功', 'system'));
           setTimeout(closeNcmLogin, 1500);
         } else if (code === 802) {
@@ -175,11 +186,7 @@ export function init() {
         dom.pwdLoginStatus.className = 'login-status success';
         state.ncmLoggedIn = true;
         updateLoginBtn();
-        fetch('/api/ncm/login/status').then(r => r.json()).then(d => {
-          state.ncmVipType = d.vipType || 0;
-          state.ncmNickname = d.nickname || '';
-          updateLoginBtn();
-        }).catch(() => {});
+        refreshNcmLoginStatus();
         import('./chat.js').then(m => m.addChatMessage('✓ 网易云登录成功', 'system'));
         setTimeout(closeNcmLogin, 1500);
       } else if (data.code === 462 || data.code === 8821) {
@@ -242,6 +249,7 @@ export function init() {
   });
 
   // NCM status check
+  refreshNcmLoginStatus();
   checkNcmStatus();
   setInterval(checkNcmStatus, 30000);
 }

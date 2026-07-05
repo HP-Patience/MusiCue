@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('node:child_process'); // silence accidental imports
 
-import { searchSongs, getSongDetail, getSongUrl, getLyric, getRecommendations, getPersonalFM, getIntelligenceList } from '../src/adapters/netease.js';
+import { searchSongs, getSongDetail, getSongUrl, getLyric, getRecommendations, getPersonalFM, getIntelligenceList, getLoginStatus } from '../src/adapters/netease.js';
 
 describe('netease adapter', () => {
   const API = 'http://localhost:3001';
@@ -157,5 +157,23 @@ describe('netease adapter', () => {
 
     const results = await getIntelligenceList(111, 456);
     expect(results).toEqual([]);
+  });
+
+  it('getLoginStatus returns nickname and VIP info', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(JSON.stringify({
+        data: {
+          account: { id: 42, vipType: 11 },
+          profile: { userId: 42, nickname: 'Patience', vipType: 11 },
+        },
+      }), { status: 200 }),
+    );
+
+    const status = await getLoginStatus();
+
+    expect(status.online).toBe(true);
+    expect(status.nickname).toBe('Patience');
+    expect(status.vipType).toBe(11);
+    expect(status.userId).toBe(42);
   });
 });

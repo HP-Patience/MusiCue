@@ -381,12 +381,14 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
     const ncmQuality = env.NCM_QUALITY || getPref(opts.db, 'ncm_quality') || '';
     const llmEnabled = getPref(opts.db, 'llm_enabled');
     const sceneSuggestionsEnabled = getPref(opts.db, 'scene_suggestions_enabled');
-    res.json({ apiKey, baseUrl, apiModel, ncmApi, weatherKey, fishKey, feishuAppId, feishuAppSecret, upnpDevices, userCorpusDir, ncmLoggedIn, ncmQuality, llmEnabled: llmEnabled !== 'false', sceneSuggestionsEnabled: sceneSuggestionsEnabled !== 'false' });
+    const quickInputShortcut = getPref(opts.db, 'quick_input_shortcut') || 'CommandOrControl+Shift+Space';
+    const autoLaunchEnabled = getPref(opts.db, 'auto_launch_enabled');
+    res.json({ apiKey, baseUrl, apiModel, ncmApi, weatherKey, fishKey, feishuAppId, feishuAppSecret, upnpDevices, userCorpusDir, ncmLoggedIn, ncmQuality, llmEnabled: llmEnabled !== 'false', sceneSuggestionsEnabled: sceneSuggestionsEnabled !== 'false', quickInputShortcut, autoLaunchEnabled: autoLaunchEnabled !== 'false' });
   });
 
   app.post('/api/config', (req: Request, res: Response) => {
     if (!opts.db) return res.status(503).json({ error: 'DB unavailable' });
-    const { apiKey, baseUrl, apiModel, ncmApi, ncmQuality, weatherKey, fishKey, feishuAppId, feishuAppSecret, upnpDevices, userCorpusDir, llmEnabled, sceneSuggestionsEnabled } = req.body;
+    const { apiKey, baseUrl, apiModel, ncmApi, ncmQuality, weatherKey, fishKey, feishuAppId, feishuAppSecret, upnpDevices, userCorpusDir, llmEnabled, sceneSuggestionsEnabled, quickInputShortcut, autoLaunchEnabled } = req.body;
     // Secrets: skip empty or masked values to avoid overwriting with placeholder
     if (apiKey !== undefined && apiKey !== '' && !apiKey.includes('*')) {
       setPref(opts.db, 'api_key', apiKey);
@@ -414,6 +416,8 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
     if (userCorpusDir !== undefined) setPref(opts.db, 'user_corpus_dir', userCorpusDir);
     if (llmEnabled !== undefined) setPref(opts.db, 'llm_enabled', llmEnabled ? 'true' : 'false');
     if (sceneSuggestionsEnabled !== undefined) setPref(opts.db, 'scene_suggestions_enabled', sceneSuggestionsEnabled ? 'true' : 'false');
+    if (quickInputShortcut !== undefined) setPref(opts.db, 'quick_input_shortcut', quickInputShortcut || 'CommandOrControl+Shift+Space');
+    if (autoLaunchEnabled !== undefined) setPref(opts.db, 'auto_launch_enabled', autoLaunchEnabled ? 'true' : 'false');
 
     syncEnvFile({ ncmApi, ncmQuality, weatherKey, fishKey, feishuAppId, feishuAppSecret, upnpDevices, userCorpusDir });
 

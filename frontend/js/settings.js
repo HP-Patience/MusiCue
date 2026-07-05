@@ -11,6 +11,15 @@ export function closeSettings() {
   dom.settingsStatus.className = 'form-status';
 }
 
+export async function syncDesktopConfig() {
+  try {
+    const res = await fetch('/api/config');
+    const data = await res.json();
+    await window.electronQuickInput?.setShortcut?.(data.quickInputShortcut || 'CommandOrControl+Shift+Space');
+    await window.electronQuickInput?.setAutoLaunch?.(data.autoLaunchEnabled !== false);
+  } catch { /* ignore desktop sync failures in browser */ }
+}
+
 export async function loadConfig() {
   try {
     const res = await fetch('/api/config');
@@ -20,6 +29,8 @@ export async function loadConfig() {
     dom.settingsApiModel.value = data.apiModel || '';
     dom.settingsLlmEnabled.checked = data.llmEnabled !== false;
     dom.settingsSceneSuggestionsEnabled.checked = data.sceneSuggestionsEnabled !== false;
+    dom.settingsQuickInputShortcut.value = data.quickInputShortcut || 'CommandOrControl+Shift+Space';
+    dom.settingsAutoLaunchEnabled.checked = data.autoLaunchEnabled !== false;
     dom.settingsNcmApi.value = data.ncmApi || 'http://localhost:3001';
     dom.settingsNcmQuality.value = data.ncmQuality || '';
     dom.settingsWeatherKey.value = data.weatherKey || '';
@@ -132,6 +143,8 @@ export function init() {
           apiModel: dom.settingsApiModel.value,
           llmEnabled: dom.settingsLlmEnabled.checked,
           sceneSuggestionsEnabled: dom.settingsSceneSuggestionsEnabled.checked,
+          quickInputShortcut: dom.settingsQuickInputShortcut.value,
+          autoLaunchEnabled: dom.settingsAutoLaunchEnabled.checked,
           ncmApi: dom.settingsNcmApi.value,
           ncmQuality: dom.settingsNcmQuality.value,
           weatherKey: dom.settingsWeatherKey.value,
@@ -143,8 +156,9 @@ export function init() {
       });
       const data = await res.json();
       if (data.ok) {
-        dom.settingsStatus.textContent = '✓ 已保存';
-        dom.settingsStatus.className = 'form-status success';
+        await window.electronQuickInput?.setShortcut?.(dom.settingsQuickInputShortcut.value);
+        await window.electronQuickInput?.setAutoLaunch?.(dom.settingsAutoLaunchEnabled.checked);
+        closeSettings();
       } else {
         throw new Error(data.message || '保存失败');
       }

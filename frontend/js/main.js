@@ -41,10 +41,32 @@ playmode.init();
 toast.init();
 ncmAuth.init();
 settings.init();
+settings.syncDesktopConfig();
 playlistsPanel.initAddToPlaylist();
 playlistsPanel.initPlaylistCreateModal();
 scene.init();
 dom.chatPanel.classList.add('active');
+
+// ── Frameless desktop window controls ──
+const electronWindow = window.electronWindow;
+const runWindowAction = (action) => {
+  if (!electronWindow?.[action]) {
+    console.warn(`[window-controls] electronWindow.${action} is unavailable`);
+    return;
+  }
+  electronWindow[action]().catch((error) => console.warn(`[window-controls] ${action} failed`, error));
+};
+document.getElementById('window-minimize')?.addEventListener('click', (event) => {
+  event.stopPropagation();
+  runWindowAction('minimize');
+});
+document.getElementById('window-close')?.addEventListener('click', (event) => {
+  event.stopPropagation();
+  runWindowAction('quit');
+});
+window.electronQuickInput?.onSubmit?.((text) => {
+  chat.sendChat(text);
+});
 
 // ── Tab switching ──
 let activePanel = 'chat';

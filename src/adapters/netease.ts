@@ -126,10 +126,10 @@ export async function getLoginStatus(): Promise<{ online: boolean; vipType: numb
   const acct = data?.data?.account;
   const profile = data?.data?.profile;
   return {
-    online: acct?.id != null,
-    vipType: acct?.vipType ?? 0,
-    nickname: profile?.nickname ?? '',
-    userId: profile?.userId,
+    online: acct?.id != null || profile?.userId != null,
+    vipType: profile?.vipType ?? acct?.vipType ?? 0,
+    nickname: profile?.nickname ?? acct?.userName ?? acct?.nickname ?? '',
+    userId: profile?.userId ?? acct?.id,
   };
 }
 

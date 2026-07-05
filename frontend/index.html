@@ -16,7 +16,7 @@
     <!-- Nav -->
     <nav class="nav">
       <div class="nav-left">
-        <div class="nav-avatar">♪</div>
+        <div class="nav-avatar"><img src="/icons/nav-logo.png" alt="Claudio" /></div>
         <span class="nav-title">Claudio</span>
       </div>
       <div class="nav-actions">
@@ -26,7 +26,11 @@
           🔔
         </button>
         <button class="nav-btn" id="theme-toggle">LIGHT</button>
-      <button class="nav-btn" id="settings-toggle" title="设置">⚙</button>
+        <button class="nav-btn" id="settings-toggle" title="设置">⚙</button>
+        <div class="window-controls" aria-label="窗口控制">
+          <button class="window-control-btn" id="window-minimize" title="最小化">—</button>
+          <button class="window-control-btn close" id="window-close" title="退出 Claudio">×</button>
+        </div>
       </div>
     </nav>
 
@@ -75,10 +79,9 @@
             <button class="ctrl-btn" id="lyric-toggle-btn" title="歌词"></button>
           </div>
           <div class="transport-right">
-            <button class="ctrl-btn text" id="hide-btn" title="隐藏">HIDE</button>
-            <button class="ctrl-btn text" id="similar-btn" title="相似推荐">相似</button>
+            <button class="ctrl-btn text" id="similar-btn" title="相似推荐"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="none" stroke="currentColor" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"><path d="M288-300 168-420h300"/><path d="M288-660 168-540h300"/><path d="M560-300h300"/><path d="M560-660h300"/><path d="M660-480h200"/></svg></button>
             <div class="add-to-playlist-wrap">
-              <button class="ctrl-btn text" id="add-to-playlist-btn" title="添加到歌单">+LIST</button>
+              <button class="ctrl-btn text" id="add-to-playlist-btn" title="添加到歌单"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="none" stroke="currentColor" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"><path d="M320-820v280"/><path d="M180-680h280"/><path d="M610-820h180v150H610v400"/><circle cx="490" cy="-280" r="125"/></svg></button>
               <div class="add-to-playlist-dropdown" id="add-to-playlist-dropdown" style="display:none"></div>
             </div>
             <input type="range" id="volume" min="0" max="100" value="80" title="音量" />
@@ -176,17 +179,28 @@
               </div>
             </div>
           </div>
-          <div class="form-group toggle-group" style="margin-top:8px">
+          <div class="form-group toggle-group">
             <label class="form-label" for="settings-llm-enabled">启用 LLM</label>
             <label class="toggle-switch">
               <input type="checkbox" id="settings-llm-enabled" checked />
               <span class="toggle-slider"></span>
             </label>
           </div>
-          <div class="form-group toggle-group" style="margin-top:8px">
+          <div class="form-group toggle-group">
             <label class="form-label" for="settings-scene-suggestions-enabled">场景推荐</label>
             <label class="toggle-switch">
               <input type="checkbox" id="settings-scene-suggestions-enabled" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="settings-quick-input-shortcut">全局快捷键</label>
+            <input type="text" id="settings-quick-input-shortcut" class="form-input" placeholder="CommandOrControl+Shift+Space" autocomplete="off" />
+          </div>
+          <div class="form-group toggle-group">
+            <label class="form-label" for="settings-auto-launch-enabled">开机自启</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="settings-auto-launch-enabled" checked />
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -335,7 +349,7 @@
 
   <script type="module" src="/js/main.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
       });
