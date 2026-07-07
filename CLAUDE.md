@@ -127,3 +127,22 @@ API 配置测试 (`POST /api/config/test`)：自动检测 Anthropic vs OpenAI-co
 4. **可审计追踪**: 每次完整的 输入→Claude→动作 链路都应该记录日志，包含 Claude 的 thought 过程。
 5. **幂等性优先**: 每个动作应该是幂等的或至少可安全重试的。
 6. **Context 收集先行**: 在调用 Claude 之前，必须收集尽可能多的上下文信息，让 Claude 做充分知情的决策。
+
+## Skill routing
+
+When the user's request matches an available skill, invoke it via the Skill tool. When in doubt, invoke the skill.
+
+Key routing rules:
+- Product ideas/brainstorming → invoke /office-hours
+- Strategy/scope → invoke /plan-ceo-review
+- Architecture → invoke /plan-eng-review
+- Design system/plan review → invoke /design-consultation or /plan-design-review
+- Full review pipeline → invoke /autoplan
+- Bugs/errors → invoke /investigate
+- QA/testing site behavior → invoke /qa or /qa-only
+- Code review/diff check → invoke /review
+- Visual polish → invoke /design-review
+- Ship/deploy/PR → invoke /ship or /land-and-deploy
+- Save progress → invoke /context-save
+- Resume context → invoke /context-restore
+- Author a backlog-ready spec/issue → invoke /spec
