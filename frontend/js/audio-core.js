@@ -175,11 +175,13 @@ export function updateModeDisplay() {
   updatePlayModeUI();
 }
 
-const PLAY_MODE_LABELS = { list: ICONS.list, single: ICONS.repeat, shuffle: ICONS.shuffle };
+const PLAY_MODE_LABELS = { list: ICONS.repeat, single: ICONS.single, shuffle: ICONS.shuffle };
+const PLAY_MODE_TITLES = { list: '列表循环', single: '单曲循环', shuffle: '随机播放' };
 
 export function updatePlayModeUI() {
   const disabled = state.isFmMode || state.isSmartMode;
   dom.playModeBtn.innerHTML = PLAY_MODE_LABELS[state.playMode] || PLAY_MODE_LABELS.list;
+  dom.playModeBtn.title = PLAY_MODE_TITLES[state.playMode] || PLAY_MODE_TITLES.list;
   dom.playModeBtn.classList.toggle('disabled', disabled);
 }
 
@@ -188,7 +190,6 @@ export function setPlayMode(mode) {
   if (mode !== 'shuffle') state._shuffleHistory = [];
   localStorage.setItem('claudio-playmode', mode);
   updatePlayModeUI();
-  dom.playModeDropdown.style.display = 'none';
 }
 
 function recordPlayback(item) {
@@ -221,7 +222,7 @@ export function playTrack(item) {
   const recordDone = recordConfirmedPlayback(item, token, audio.src);
   dom.nowPlaying.textContent = `${item.name} - ${item.artist}`;
   dom.onAir.classList.add('active');
-  addChatMessage(`🎵 Now playing: ${item.name} — ${item.artist}`, 'system');
+  addChatMessage(`Now playing: ${item.name} — ${item.artist}`, 'now-playing');
 
   if (item.songId && state.lovedSongs.has(item.songId)) {
     dom.loveBtn.innerHTML = ICONS['heart-filled'];
@@ -385,10 +386,20 @@ export function init() {
   dom.prevBtn.addEventListener('click', () => prevTrack());
   dom.nextBtn.addEventListener('click', () => nextTrack());
 
-  dom.volumeSlider.addEventListener('input', () => {
-    state.volume = parseInt(dom.volumeSlider.value);
+  const setVolume = (value) => {
+    state.volume = Math.max(0, Math.min(100, Math.round(value)));
+    dom.volumeSlider.value = String(state.volume);
     audio.volume = state.volume / 100;
     localStorage.setItem('claudio-volume', String(state.volume));
+    dom.volumeBtn.title = `音量 ${state.volume}%`;
+  };
+  setVolume(state.volume);
+  dom.volumeSlider.addEventListener('input', () => {
+    setVolume(parseInt(dom.volumeSlider.value));
+  });
+  dom.volumeWrap.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    setVolume(state.volume + (event.deltaY < 0 ? 5 : -5));
   });
 
   const progressContainer = document.querySelector('.progress-container');

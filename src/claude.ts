@@ -57,13 +57,13 @@ export async function invokeClaude(
   const { timeout = 120000, db } = options;
 
   const apiKey = db ? getPref(db, 'api_key') || process.env['ANTHROPIC_API_KEY'] || '' : process.env['ANTHROPIC_API_KEY'] || '';
-  const baseUrl = (db ? getPref(db, 'api_base_url') || '' : '') || 'https://api.anthropic.com';
+  const baseUrl = (db ? getPref(db, 'api_base_url') || '' : '') || process.env['ANTHROPIC_BASE_URL'] || 'https://api.anthropic.com';
 
   if (!apiKey) {
     throw new Error('API Key 未配置，请在设置中填写');
   }
 
-  const cleanBase = baseUrl.replace(/\/+$/, '');
+  const cleanBase = baseUrl.replace(/\/v1\/?$/i, '').replace(/\/+$/, '');
   const isAnthropic = cleanBase.includes('anthropic.com');
   const model = (db ? getPref(db, 'api_model') || '' : '') || process.env['API_MODEL'] || 'deepseek-v4-flash';
 

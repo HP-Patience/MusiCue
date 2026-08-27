@@ -6,7 +6,9 @@ export function setTheme(theme) {
   state.theme = theme;
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('claudio-theme', theme);
-  dom.themeToggle.textContent = theme === 'dark' ? 'LIGHT' : 'DARK';
+  const label = theme === 'dark' ? '切换到浅色模式' : '切换到暗色模式';
+  dom.themeToggle.title = label;
+  dom.themeToggle.setAttribute('aria-label', label);
 }
 
 export function init() {

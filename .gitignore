@@ -29,6 +29,7 @@ node_modules/
 # Runtime
 state.db
 server.log
+logs/
 tmp/
 Archive/
 

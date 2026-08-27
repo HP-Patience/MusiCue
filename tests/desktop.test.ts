@@ -43,7 +43,7 @@ describe('desktop ports', () => {
     const main = fs.readFileSync(new URL('../electron/main.ts', import.meta.url), 'utf8');
     const preload = fs.readFileSync(new URL('../electron/preload.cjs', import.meta.url), 'utf8');
 
-    expect(main).toContain('width: 542');
+    expect(main).toContain('width: 576');
     expect(main).toContain('height: 753');
     expect(main).toContain('resizable: true');
     expect(main).toContain('useContentSize: true');
@@ -53,6 +53,7 @@ describe('desktop ports', () => {
     expect(main).toContain("backgroundColor: '#00000000'");
     expect(main).toContain("preload: path.join(resourceRoot(), 'electron', 'preload.cjs')");
     expect(main).toContain("ipcMain.handle('window:minimize'");
+    expect(main).toContain("ipcMain.handle('window:pin'");
     expect(main).toContain("ipcMain.handle('window:close'");
     expect(main).toContain("ipcMain.handle('window:quit'");
     expect(main).toContain("clearStorageData({ storages: ['serviceworkers', 'cachestorage'] })");
@@ -60,6 +61,7 @@ describe('desktop ports', () => {
     expect(main).not.toContain('minHeight:');
     expect(preload).toContain("contextBridge.exposeInMainWorld('electronWindow'");
     expect(preload).toContain("ipcRenderer.invoke('window:minimize')");
+    expect(preload).toContain("ipcRenderer.invoke('window:pin')");
     expect(preload).toContain("ipcRenderer.invoke('window:close')");
     expect(preload).toContain("ipcRenderer.invoke('window:quit')");
   });
@@ -79,12 +81,21 @@ describe('desktop ports', () => {
     expect(main).toContain("ipcMain.handle('quick-input:set-auto-launch'");
     expect(main).toContain("webContents.send('quick-input:submit'");
     expect(main).toContain('setLoginItemSettings');
-    expect(main).toContain('openAtLogin: true');
+    expect(main).not.toContain('openAtLogin: true');
     expect(main).toContain('globalShortcut.unregisterAll');
     expect(preload).toContain("contextBridge.exposeInMainWorld('electronQuickInput'");
     expect(preload).toContain("ipcRenderer.invoke('quick-input:submit'");
     expect(preload).toContain("ipcRenderer.invoke('quick-input:close'");
     expect(preload).toContain("ipcRenderer.on('quick-input:submit'");
     expect(preload).toContain("ipcRenderer.on('quick-input:focus'");
+  });
+
+  it('copies the complete NetEase API runtime after packaging', () => {
+    const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    const afterPack = fs.readFileSync(new URL('../electron/after-pack.cjs', import.meta.url), 'utf8');
+
+    expect(pkg.build.afterPack).toBe('electron/after-pack.cjs');
+    expect(afterPack).toContain("path.join(context.packager.projectDir, 'api-enhanced')");
+    expect(afterPack).toContain('fs.cpSync(source, destination');
   });
 });

@@ -47,6 +47,7 @@ describe('parseOutput', () => {
 describe('invokeClaude', () => {
   const originalKey = process.env.ANTHROPIC_API_KEY;
   const originalModel = process.env.API_MODEL;
+  const originalBaseUrl = process.env.ANTHROPIC_BASE_URL;
 
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -59,6 +60,8 @@ describe('invokeClaude', () => {
     else process.env.ANTHROPIC_API_KEY = originalKey;
     if (originalModel === undefined) delete process.env.API_MODEL;
     else process.env.API_MODEL = originalModel;
+    if (originalBaseUrl === undefined) delete process.env.ANTHROPIC_BASE_URL;
+    else process.env.ANTHROPIC_BASE_URL = originalBaseUrl;
   });
 
   it('posts prompt to Anthropic Messages API', async () => {
@@ -85,6 +88,17 @@ describe('invokeClaude', () => {
     expect(result.say).toBe('Hi');
     expect(result.play).toEqual(['123']);
     expect(result.usage).toEqual({ input_tokens: 10, output_tokens: 5, context_window: 200000 });
+  });
+
+  it('removes a trailing /v1 before appending the Anthropic endpoint', async () => {
+    process.env.ANTHROPIC_BASE_URL = 'https://api.anthropic.com/v1/';
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify({
+      content: [{ type: 'text', text: JSON.stringify({ say: 'Hi', play: [] }) }],
+    }), { status: 200 }));
+
+    await invokeClaude('test prompt');
+
+    expect(fetchSpy.mock.calls[0][0]).toBe('https://api.anthropic.com/v1/messages');
   });
 
   it('rejects on timeout', async () => {

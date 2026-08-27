@@ -28,7 +28,7 @@ describe('responsive frontend layout', () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   });
 
-  it('fills wide desktop windows without side gutters', async () => {
+  it('leaves a transparent desktop gutter for the window shadow', async () => {
     await page.setViewportSize({ width: 1180, height: 820 });
     await page.goto(baseUrl);
 
@@ -47,9 +47,9 @@ describe('responsive frontend layout', () => {
 
     expect(dimensions.htmlWidth).toBe(1180);
     expect(dimensions.bodyWidth).toBe(1180);
-    expect(dimensions.appX).toBe(0);
-    expect(dimensions.appY).toBe(0);
-    expect(dimensions.appWidth).toBe(1180);
+    expect(dimensions.appX).toBe(4);
+    expect(dimensions.appY).toBe(4);
+    expect(dimensions.appWidth).toBe(1172);
     expect(dimensions.htmlOverflow).toBe('hidden');
     expect(dimensions.bodyOverflow).toBe('hidden');
     expect(dimensions.bodyBackground).toBe('rgba(0, 0, 0, 0)');
@@ -64,6 +64,7 @@ describe('responsive frontend layout', () => {
     const controls = await page.evaluate(() => ({
       navRegion: getComputedStyle(document.querySelector('.nav')!).getPropertyValue('-webkit-app-region'),
       actionsRegion: getComputedStyle(document.querySelector('.nav-actions')!).getPropertyValue('-webkit-app-region'),
+      pinExists: !!document.querySelector('#window-pin'),
       minimizeExists: !!document.querySelector('#window-minimize'),
       closeExists: !!document.querySelector('#window-close'),
       swGuardPresent: document.documentElement.outerHTML.includes("location.hostname !== '127.0.0.1'"),
@@ -71,9 +72,83 @@ describe('responsive frontend layout', () => {
 
     expect(controls.navRegion).toBe('drag');
     expect(controls.actionsRegion).toBe('no-drag');
+    expect(controls.pinExists).toBe(true);
     expect(controls.minimizeExists).toBe(true);
     expect(controls.closeExists).toBe(true);
     expect(controls.swGuardPresent).toBe(true);
+  });
+
+  it('opens the vertical volume control and supports wheel adjustment', async () => {
+    await page.setViewportSize({ width: 576, height: 753 });
+    await page.goto(baseUrl);
+    const button = page.locator('#volume-btn');
+    const slider = page.locator('#volume');
+    await button.hover();
+    expect(await page.locator('#volume-popover').isVisible()).toBe(true);
+    const before = Number(await slider.inputValue());
+    await button.dispatchEvent('wheel', { deltaY: -100 });
+    expect(Number(await slider.inputValue())).toBe(Math.min(100, before + 5));
+  });
+
+  it('scrolls a long playlist collection without shrinking cards', async () => {
+    const playlists = Array.from({ length: 12 }, (_, index) => ({
+      id: index + 1,
+      name: `Playlist ${index + 1}`,
+      trackCount: 20 + index,
+      coverImgUrl: '',
+    }));
+    await page.route('**/api/config', route => route.fulfill({ json: { ncmLoggedIn: true } }));
+    await page.route('**/api/ncm/login/status', route => route.fulfill({ json: { loggedIn: true, vipType: 0 } }));
+    await page.route('**/api/status/ncm', route => route.fulfill({ json: { online: true } }));
+    await page.route('**/api/ncm/playlists', route => route.fulfill({ json: { playlists } }));
+    await page.route('**/api/ncm/playlist/1', route => route.fulfill({ json: {
+      playlist: playlists[0],
+      tracks: Array.from({ length: 12 }, (_, index) => ({
+        id: index + 1,
+        name: `Track ${index + 1}`,
+        artist: `Artist ${index + 1}`,
+      })),
+    } }));
+    await page.route('**/api/favorites', route => route.fulfill({ json: { favorites: [] } }));
+    await page.route('**/api/messages', route => route.fulfill({ json: { messages: [] } }));
+    await page.setViewportSize({ width: 576, height: 753 });
+    await page.goto(baseUrl);
+    await page.waitForFunction(() => document.querySelector('#ncm-login-btn')?.classList.contains('logged-in'));
+    await page.click('.chat-tab[data-tab="playlists"]');
+    await page.locator('.playlist-card').nth(11).waitFor();
+
+    const metrics = await page.locator('#playlists-panel').evaluate((panel) => {
+      const cards = [...panel.querySelectorAll('.playlist-card')];
+      return {
+        clientHeight: panel.clientHeight,
+        scrollHeight: panel.scrollHeight,
+        minCardHeight: Math.min(...cards.map(card => card.getBoundingClientRect().height)),
+      };
+    });
+    expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight);
+    expect(metrics.minCardHeight).toBeGreaterThan(50);
+
+    const lastCard = page.locator('.playlist-card').last();
+    await lastCard.scrollIntoViewIfNeeded();
+    expect(await lastCard.isVisible()).toBe(true);
+
+    const firstCard = page.locator('.playlist-card').first();
+    await firstCard.scrollIntoViewIfNeeded();
+    await firstCard.click();
+    await page.locator('.playlist-track-item').nth(11).waitFor();
+    const detailMetrics = await page.locator('#playlists-panel').evaluate((panel) => {
+      const tracks = panel.querySelector('.playlist-tracks');
+      return {
+        panelClientHeight: panel.clientHeight,
+        panelScrollHeight: panel.scrollHeight,
+        tracksOverflow: tracks ? getComputedStyle(tracks).overflowY : '',
+      };
+    });
+    expect(detailMetrics.panelScrollHeight).toBeGreaterThan(detailMetrics.panelClientHeight);
+    expect(detailMetrics.tracksOverflow).toBe('visible');
+    const lastTrack = page.locator('.playlist-track-item').last();
+    await lastTrack.scrollIntoViewIfNeeded();
+    expect(await lastTrack.isVisible()).toBe(true);
   });
 
   it('supports quick input focus, submit, and escape close', async () => {
@@ -90,7 +165,7 @@ describe('responsive frontend layout', () => {
     await page.goto(`${baseUrl}/quick-input.html`);
 
     const input = page.locator('#quick-input');
-    expect(await input.getAttribute('placeholder')).toBe('What can I help you with today?');
+    expect(await input.getAttribute('placeholder')).toBe('Say something to the DJ.');
     expect(await input.evaluate((el) => document.activeElement === el)).toBe(true);
 
     await input.fill('播放适合工作的歌');
@@ -117,10 +192,10 @@ describe('responsive frontend layout', () => {
 
     const hiddenStyles = await page.evaluate(() => ({
       transportLeft: getComputedStyle(document.querySelector('.transport-left')!).display,
-      volume: getComputedStyle(document.querySelector('#volume')!).display,
+      volumeButton: getComputedStyle(document.querySelector('#volume-btn')!).display,
     }));
     expect(hiddenStyles.transportLeft).toBe('none');
-    expect(hiddenStyles.volume).toBe('none');
+    expect(hiddenStyles.volumeButton).toBe('flex');
 
     const inputBox = await page.locator('#chat-input').boundingBox();
     const sendBox = await page.locator('#send-btn').boundingBox();

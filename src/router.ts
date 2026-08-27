@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Express, Request, Response, NextFunction } from 'express';
 import type Database from 'better-sqlite3';
-import { getRecentPlays, getPlayHistory, getPlan, addMessage, addPlay, getMessages, getPref, setPref, addFavorite, removeFavorite, isFavorite, getFavorites, addHiddenSong, getPlayStats, getPlayStatsAll } from './db.js';
+import { getRecentPlays, getPlayHistory, getPlan, addMessage, addPlay, getMessages, clearMessages, getPref, setPref, addFavorite, removeFavorite, isFavorite, getFavorites, addHiddenSong, getPlayStats, getPlayStatsAll } from './db.js';
 import { invokeClaude } from './claude.js';
 import { assemblePrompt } from './context.js';
 import { getSuggestedQueue } from './predictor.js';
@@ -82,8 +82,6 @@ function extractMusicU(cookie: string): string {
   return match ? match[1] : '';
 }
 
-const NCM_API_BASE = process.env.NCM_API ?? 'http://localhost:3001';
-
 const SIMPLE_COMMANDS = new Set([
   '下一首', '暂停', '继续', '上一首', '音量加', '音量减',
   'next', 'pause', 'resume', 'prev', 'volume_up', 'volume_down',
@@ -106,6 +104,10 @@ function loadDJPrompt(): string {
   }
 }
 
+function maskSecret(value: string): string {
+  return value ? '********' : '';
+}
+
 interface RouterOptions {
   db?: Database.Database;
   executor?: ReturnType<typeof createExecutor>;
@@ -118,6 +120,11 @@ export function createApp(opts: RouterOptions = {}): Express {
   app.post('/api/chat', async (req: Request, res: Response, next: NextFunction) => {
     try {
     const { text } = req.body;
+
+    if (typeof text !== 'string' || !text.trim()) {
+      res.status(400).json({ error: 'text required' });
+      return;
+    }
 
     if (classifyIntent(text) === 'simple') {
       if (opts.db) addMessage(opts.db, { role: 'user', content: text });
@@ -142,11 +149,15 @@ export function createApp(opts: RouterOptions = {}): Express {
     if (opts.executor) {
       try {
         const { lat, lon } = req.body;
-        if (lat != null && lon != null) {
-          cacheCoords(Number(lat), Number(lon));
+        const requestLat = Number(lat);
+        const requestLon = Number(lon);
+        if (lat != null && lon != null && Number.isFinite(requestLat) && Number.isFinite(requestLon)) {
+          cacheCoords(requestLat, requestLon);
         }
         const ctx = await opts.executor.getContext(
-          (lat != null && lon != null) ? { lat: Number(lat), lon: Number(lon) } : undefined
+          (lat != null && lon != null && Number.isFinite(requestLat) && Number.isFinite(requestLon))
+            ? { lat: requestLat, lon: requestLon }
+            : undefined
         );
         weather = ctx.weather;
         calendar = ctx.calendar;
@@ -301,6 +312,12 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
     res.json({ messages });
   });
 
+  app.delete('/api/messages', (_req: Request, res: Response) => {
+    if (!opts.db) return res.status(503).json({ error: 'DB unavailable' });
+    clearMessages(opts.db);
+    res.json({ ok: true });
+  });
+
   app.get('/api/now', (_req: Request, res: Response) => {
     const queue = opts.db ? getRecentPlays(opts.db, 20) : [];
     res.json({ current: queue[0] ?? null, queue });
@@ -342,8 +359,13 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
         return res.json({ enabled: false, scene: null, say: '', play: [], reason: '' });
       }
       const { lat, lon } = req.query;
+      const requestLat = Number(lat);
+      const requestLon = Number(lon);
+      if (lat != null && lon != null && (!Number.isFinite(requestLat) || !Number.isFinite(requestLon))) {
+        return res.status(400).json({ error: 'invalid coordinates' });
+      }
       const ctx = await opts.executor.getContext(
-        (lat != null && lon != null) ? { lat: Number(lat), lon: Number(lon) } : undefined
+        (lat != null && lon != null) ? { lat: requestLat, lon: requestLon } : undefined
       );
       const suggestion = await getSuggestedQueue({
         db: opts.db,
@@ -383,7 +405,7 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
     const sceneSuggestionsEnabled = getPref(opts.db, 'scene_suggestions_enabled');
     const quickInputShortcut = getPref(opts.db, 'quick_input_shortcut') || 'CommandOrControl+Shift+Space';
     const autoLaunchEnabled = getPref(opts.db, 'auto_launch_enabled');
-    res.json({ apiKey, baseUrl, apiModel, ncmApi, weatherKey, fishKey, feishuAppId, feishuAppSecret, upnpDevices, userCorpusDir, ncmLoggedIn, ncmQuality, llmEnabled: llmEnabled !== 'false', sceneSuggestionsEnabled: sceneSuggestionsEnabled !== 'false', quickInputShortcut, autoLaunchEnabled: autoLaunchEnabled !== 'false' });
+    res.json({ apiKey: maskSecret(apiKey), baseUrl, apiModel, ncmApi, weatherKey: maskSecret(weatherKey), fishKey: maskSecret(fishKey), feishuAppId, feishuAppSecret: maskSecret(feishuAppSecret), upnpDevices, userCorpusDir, ncmLoggedIn, ncmQuality, llmEnabled: llmEnabled !== 'false', sceneSuggestionsEnabled: sceneSuggestionsEnabled !== 'false', quickInputShortcut, autoLaunchEnabled: autoLaunchEnabled === 'true' });
   });
 
   app.post('/api/config', (req: Request, res: Response) => {
@@ -435,12 +457,15 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
 
   app.post('/api/config/test', async (req: Request, res: Response, next: NextFunction) => {
     if (!opts.db) return res.status(503).json({ error: 'DB unavailable' });
-    const apiKey = req.body.apiKey || getPref(opts.db, 'api_key') || '';
-    const baseUrl = req.body.baseUrl || getPref(opts.db, 'api_base_url') || '';
+    const suppliedApiKey = typeof req.body.apiKey === 'string' ? req.body.apiKey : '';
+    const apiKey = suppliedApiKey && !suppliedApiKey.includes('*')
+      ? suppliedApiKey
+      : getPref(opts.db, 'api_key') || process.env.ANTHROPIC_API_KEY || '';
+    const baseUrl = req.body.baseUrl || getPref(opts.db, 'api_base_url') || process.env.ANTHROPIC_BASE_URL || '';
     if (!apiKey) return res.status(400).json({ ok: false, message: 'API Key 不能为空' });
     if (!baseUrl) return res.status(400).json({ ok: false, message: 'Base URL 不能为空' });
 
-    const cleanBase = baseUrl.replace(/\/+$/, '');
+    const cleanBase = baseUrl.replace(/\/v1\/?$/i, '').replace(/\/+$/, '');
     const isAnthropic = cleanBase.includes('anthropic.com');
     const testModel = req.body.apiModel || getPref(opts.db, 'api_model') || 'deepseek-v4-flash';
 
@@ -462,7 +487,7 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
         const u = new URL(`${cleanBase}/v1/chat/completions`);
         const result = await new Promise<{ ok: boolean; message: string }>((resolve) => {
           const req = https.request({
-            hostname: u.hostname, port: 443, path: u.pathname, method: 'POST',
+             hostname: u.hostname, port: u.port || 443, path: `${u.pathname}${u.search}`, method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'Content-Length': Buffer.byteLength(body) },
             timeout: 10000,
           }, (r) => {
@@ -492,10 +517,10 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
 
   app.get('/api/models', async (_req: Request, res: Response, next: NextFunction) => {
     if (!opts.db) return res.status(503).json({ error: 'DB unavailable' });
-    const apiKey = getPref(opts.db, 'api_key') || '';
-    const baseUrl = getPref(opts.db, 'api_base_url') || '';
+    const apiKey = getPref(opts.db, 'api_key') || process.env.ANTHROPIC_API_KEY || '';
+    const baseUrl = getPref(opts.db, 'api_base_url') || process.env.ANTHROPIC_BASE_URL || '';
     if (!apiKey) return res.json({ ok: false, message: 'API Key 未配置' });
-    const cleanBase = baseUrl.replace(/\/+$/, '');
+    const cleanBase = baseUrl.replace(/\/v1\/?$/i, '').replace(/\/+$/, '');
     if (cleanBase.includes('anthropic.com')) return res.json({ ok: false, message: 'Anthropic 不支持列出模型' });
     try {
       // OpenAI-compatible: try /v1/models first, fallback to /models (DeepSeek)
@@ -710,7 +735,7 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
         (async () => {
           const ctrl = new AbortController();
           const timer = setTimeout(() => ctrl.abort(), 3000);
-          const r = await fetch(`${NCM_API_BASE}/search?keywords=test&limit=1`, {
+          const r = await fetch(`${getNcmBase().replace(/\/+$/, '')}/`, {
             signal: ctrl.signal,
           });
           clearTimeout(timer);
@@ -730,7 +755,7 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
   app.get('/api/weather', async (req: Request, res: Response, next: NextFunction) => {
     const lat = Number(req.query.lat);
     const lon = Number(req.query.lon);
-    if (isNaN(lat) || isNaN(lon)) return res.status(400).json({ error: 'lat and lon required' });
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return res.status(400).json({ error: 'lat and lon required' });
     cacheCoords(lat, lon);
     if (!hasWeatherKey()) return res.status(204).send();
     try {

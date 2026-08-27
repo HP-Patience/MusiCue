@@ -1,88 +1,142 @@
 # Claudio FM
 
-AI-powered music assistant. Tell it what you feel like hearing — it picks the songs, announces them, and controls your speakers.
+<p align="right"><a href="./README.zh-CN.md">简体中文</a></p>
 
-```
-Say "play some jazz" → LLM reasons → searches NetEase Cloud Music → plays + TTS DJ
-```
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Claudio FM, a local-first AI radio that turns natural language into music, DJ voice, and device actions">
+</p>
+
+
+
+<p align="center">
+  <strong>For people who want music to fit the moment, Claudio FM turns a natural-language request into a considered queue with a spoken DJ intro.</strong><br>
+  It collects your taste, routine, weather, calendar, time, and playback history, then routes the result to NetEase Cloud Music, TTS, and optional UPnP speakers.
+</p>
+
+<p align="center">
+  <a href="https://github.com/HP-Patience/Claudio/stargazers"><img src="https://img.shields.io/github/stars/HP-Patience/Claudio?style=flat-square&label=stars" alt="GitHub stars"></a>
+  <a href="https://github.com/HP-Patience/Claudio/network/members"><img src="https://img.shields.io/github/forks/HP-Patience/Claudio?style=flat-square&label=forks" alt="GitHub forks"></a>
+  <a href="https://github.com/HP-Patience/Claudio"><img src="https://img.shields.io/github/languages/top/HP-Patience/Claudio?style=flat-square" alt="Top language"></a>
+  <a href="https://github.com/HP-Patience/Claudio/commits/master"><img src="https://img.shields.io/github/last-commit/HP-Patience/Claudio?style=flat-square" alt="Last commit"></a>
+  <a href="https://github.com/HP-Patience/Claudio/issues"><img src="https://img.shields.io/github/issues/HP-Patience/Claudio?style=flat-square" alt="Open issues"></a>
+</p>
+
+## See It
+
+<p align="center">
+  <img src="./assets/readme/player-preview-cropped.png" width="100%" alt="Claudio FM player interface with clock, playback controls, chat, and connection status">
+</p>
+
+Claudio is designed as a quiet local player: the interface shows the current track, queue, chat, connection state, and controls in one surface.
+
+## How It Works
+
+<p align="center">
+  <img src="./assets/readme/workflow.svg" width="100%" alt="Claudio workflow from local context collection to structured LLM decisions and music, voice, and device execution">
+</p>
+
+1. **Collect context** from `user/` plus weather, calendar, time, and playback history.
+2. **Ask the LLM** to interpret the request and return structured actions such as `say`, `play`, `reason`, and `segue`.
+3. **Execute the route** through NetEase Cloud Music, Fish Audio TTS, WebSocket updates, and optional UPnP devices.
+
+The server keeps the orchestration in one auditable path. Simple transport commands such as `next`, `pause`, and `resume` can be handled locally; open-ended requests go through the configured OpenAI-compatible LLM endpoint.
 
 ## Quick Start
 
+### 1. Start the NetEase Cloud Music API
+
+Claudio requires [NeteaseCloudMusicApiEnhanced](https://github.com/547174207/NeteaseCloudMusicApiEnhanced) as a separate service:
+
 ```bash
-# 1. Start NetEase Cloud Music API (separate service)
 cd api-enhanced
 npm install
 PORT=3001 node app.js
+```
 
-# 2. Start Claudio
+### 2. Start Claudio
+
+From the repository root:
+
+```bash
 npm install
-npm run dev          # http://localhost:3005
+npm run dev
 ```
 
-**Or** use `start-claudio.bat` on Windows (starts both services with readiness polling).
+Open [http://localhost:3005](http://localhost:3005). On Windows, `start-claudio.bat` starts both services with readiness polling.
 
-### First-time setup
+### 3. Configure the first session
 
-1. Open http://localhost:3005
-2. Click ⚙ → set your **API Key** (Anthropic or OpenAI-compatible)
-3. **Test Connection** → **Save**
+1. Open **Settings**.
+2. Enter the API key for your OpenAI-compatible LLM endpoint.
+3. Set the base URL and model when needed.
+4. Use **Test Connection**, then **Save**.
+5. Ask the DJ for something to hear, such as `play something for a rainy night`.
 
-See [docs/user-manual.md](docs/user-manual.md) for full usage guide.
+## Capabilities
 
-## Architecture
+- Natural-language music requests with context-aware selection.
+- DJ voice announcements through Fish Audio TTS.
+- Normal, SMART, and NetEase Private FM playback modes.
+- Local user corpus for taste, routines, mood rules, and playlists.
+- Weather and Feishu calendar context for scene suggestions.
+- Queue, favorites, hidden songs, history, playlists, and playback statistics.
+- Optional UPnP control for compatible speakers and devices.
+- PWA shell and Electron desktop packaging for Windows.
 
-```
-User / frontend (natural language)
-    │
-    ▼
-Context Collector  ── weather, calendar, time, history
-    │
-    ▼
-Claude / LLM  ── reasons, outputs JSON action sequence
-    │
-    ▼
-Action Executor  ── search → play → TTS → UPnP
-```
+## User Corpus
 
-- **Context Collector**: [src/context.ts](src/context.ts) — loads user corpus, fetches weather/calendar
-- **Orchestrator**: [src/claude.ts](src/claude.ts) — calls Anthropic / OpenAI-compatible API, parses structured JSON output
-- **Action Executor**: [src/executor.ts](src/executor.ts) — executes play commands from LLM output
-- **Service Adapters**: NetEase, Weather, Feishu Calendar, UPnP, Fish Audio TTS under [src/adapters/](src/adapters/)
+The files in `user/` shape the DJ's choices without changing application code:
+
+| File | Purpose |
+| --- | --- |
+| `taste.md` | Artists, genres, preferences, and dislikes |
+| `routines.md` | Regular daily routines and listening moments |
+| `mood-rules.md` | Rules connecting moods or situations to music |
+| `playlists.json` | Personal playlist data |
+
+Set `USER_CORPUS_DIR` to use a different corpus directory, or configure it through the settings panel.
 
 ## Stack
 
-| Layer | Tech |
-|-------|------|
-| Runtime | Node.js + TypeScript (`tsx`) |
-| HTTP | Express 5 |
-| Real-time | WebSocket (`ws`, path `/stream`) |
-| Database | SQLite (`better-sqlite3`) |
-| LLM | Anthropic Messages API / OpenAI-compatible |
-| Frontend | Vanilla JS + HTML/CSS (single file) |
+| Layer | Technology |
+| --- | --- |
+| Runtime | Node.js + TypeScript with `tsx` |
+| Server | Express 5 + native HTTP server |
+| Real-time | WebSocket (`ws`) at `/stream` |
+| State | SQLite through `better-sqlite3` |
+| LLM | OpenAI-compatible API |
+| Frontend | Vanilla JavaScript, HTML, CSS, and PWA APIs |
 | Tests | Vitest + supertest |
 
 ## Commands
 
 ```bash
-npm run dev          # start dev server
-npm test             # run all tests
-npm run test:watch   # watch mode
+npm run dev          # start the server on port 3005
+npm test             # run the full test suite
+npm run test:watch   # watch tests
+npm run build        # build the server and Electron process
+npm run dev:desktop  # build and launch the Electron app
+npm run dist:win    # build a Windows installer
 ```
 
-## Config
+## Configuration
 
-Two-layer: `.env` file + SQLite `prefs` table. DB values take priority.
-Configured in-app via the settings panel or `POST /api/config`.
+Configuration is shared between the `.env` file and the SQLite `prefs` table. Database values take priority. The settings panel can write the main runtime values, or use `POST /api/config` and `POST /api/config/test` directly.
 
-API 配置测试自动检测 Anthropic vs OpenAI-compatible 端点。
+Common integrations:
 
-## NCM API
+- LLM: an OpenAI-compatible endpoint.
+- Music: the local NetEase Cloud Music API service at `http://localhost:3001`.
+- Weather: the configured weather provider key.
+- Voice: Fish Audio API key.
+- Calendar: Feishu App ID and App Secret.
+- Devices: a JSON list of UPnP devices.
 
-Claudio requires [NeteaseCloudMusicApiEnhanced](https://github.com/547174207/NeteaseCloudMusicApiEnhanced) (v4.35.1).
-This is a third-party project with its own dependencies — run `npm install` inside `api-enhanced/` before use.
+## Documentation
 
-## Related
+- [User manual](docs/user-manual.md) — setup, interface, playback modes, commands, and integrations.
+- [Development reference](CLAUDE.md) — architecture, data flow, constraints, and development notes.
 
-- [CLAUDE.md](CLAUDE.md) — development reference (Chinese)
-- [docs/user-manual.md](docs/user-manual.md) — user manual (Chinese)
-- [docs/](docs/) — additional documentation
+## License
+
+See the repository for the current license and distribution terms.

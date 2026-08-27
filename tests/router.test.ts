@@ -26,6 +26,7 @@ vi.mock('../src/db.js', () => ({
     totalPages: 1,
   }),
   addMessage: vi.fn(),
+  clearMessages: vi.fn(),
   addPlay: vi.fn(),
   getPref: vi.fn().mockReturnValue(null),
   getPlayStats: vi.fn().mockReturnValue(null),
@@ -69,7 +70,7 @@ vi.mock('../src/adapters/netease.js', () => ({
   getSimilarSongs: vi.fn().mockResolvedValue([{ id: 456, name: 'Similar Song', artist: 'Similar Artist', album: 'Similar Album' }]),
 }));
 
-import { getRecentPlays, getPlayHistory, getPref, setPref, addPlay, getPlayStats } from '../src/db.js';
+import { getRecentPlays, getPlayHistory, getPref, setPref, addPlay, clearMessages, getPlayStats } from '../src/db.js';
 import { invokeClaude } from '../src/claude.js';
 import { assemblePrompt } from '../src/context.js';
 import { getSuggestedQueue } from '../src/predictor.js';
@@ -213,6 +214,24 @@ describe('router', () => {
       expect(res.status).toBe(200);
       expect(fs.readFileSync(path.join(dataDir, '.env'), 'utf-8')).toContain('NCM_API=http://127.0.0.1:3999');
       expect(fs.existsSync(path.resolve('.env'))).toBe(false);
+    });
+  });
+
+  describe('DELETE /api/messages', () => {
+    it('clears chat messages without touching playback history', async () => {
+      const res = await request(app).delete('/api/messages');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ ok: true });
+      expect(clearMessages).toHaveBeenCalledWith(expect.anything());
+      expect(addPlay).not.toHaveBeenCalled();
+    });
+
+    it('returns unavailable when the database is missing', async () => {
+      const res = await request(createApp()).delete('/api/messages');
+
+      expect(res.status).toBe(503);
+      expect(clearMessages).not.toHaveBeenCalled();
     });
   });
 

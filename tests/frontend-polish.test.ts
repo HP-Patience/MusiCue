@@ -105,25 +105,24 @@ describe('frontend polish', () => {
   it('keeps window controls inline and disables progress hover resizing', () => {
     const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
 
-    expect(css).toMatch(/\.nav-actions\s*\{[\s\S]*display:\s*flex;[\s\S]*align-items:\s*center;[\s\S]*gap:\s*8px;/);
+    expect(css).toMatch(/\.nav-actions\s*\{[\s\S]*display:\s*flex;[\s\S]*align-items:\s*center;[\s\S]*gap:\s*4px;/);
     const progressHover = css.slice(css.indexOf('.progress-container:hover'), css.indexOf('.typing-dots'));
     expect(progressHover).toContain('cursor: pointer');
     expect(progressHover).not.toContain('height:');
   });
 
-  it('stacks settings toggles under their labels and closes after save', () => {
+  it('places settings toggles in one row and keeps the modal open after save', () => {
     const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
     const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
     const settings = fs.readFileSync(path.resolve('frontend/js/settings.js'), 'utf-8');
 
-    expect(css).toMatch(/\.toggle-group\s*\{[\s\S]*align-items:\s*flex-start;[\s\S]*gap:\s*8px;/);
+    expect(css).toMatch(/\.settings-toggle-row\s*\{[\s\S]*grid-template-columns:\s*repeat\(3,/);
     expect(css).toMatch(/\.toggle-switch\s*\{[\s\S]*width:\s*42px;[\s\S]*height:\s*24px;/);
-    expect(html).not.toContain('class="form-group toggle-group" style="margin-top:8px"');
-    expect(settings).toContain('closeSettings();');
+    expect(html).toContain('class="connection-test-row"');
     expect(settings).toContain('syncDesktopConfig');
     expect(settings).toContain('setShortcut');
     expect(settings).toContain('setAutoLaunch');
-    expect(settings).not.toContain("dom.settingsStatus.textContent = '✓ 已保存'");
+    expect(settings).toContain("dom.settingsStatus.textContent = '✓ 已保存'");
   });
 
   it('uses generated brand icons for app, tray, and navbar', () => {
@@ -146,9 +145,9 @@ describe('frontend polish', () => {
     const main = fs.readFileSync(path.resolve('frontend/js/main.js'), 'utf-8');
 
     expect(html).toContain('id="quick-input"');
-    expect(html).toContain('What can I help you with today?');
+    expect(html).toContain('Say something to the DJ.');
     expect(css).toContain('.quick-input-bar');
-    expect(css).toContain('background: #ffffff');
+    expect(css).toContain('background: var(--bg-card)');
     expect(css).toContain('border-radius: 999px');
     expect(css).toContain('.quick-input-field::placeholder');
     expect(css).toContain('color: var(--orange)');
@@ -170,5 +169,51 @@ describe('frontend polish', () => {
 
     expect(fmSource).toContain('playTrack(item)');
     expect(fmSource).not.toContain('state.currentTrack = item');
+  });
+
+  it('retries NCM status quickly until the local service is online', () => {
+    const source = fs.readFileSync(path.resolve('frontend/js/ncm-auth.js'), 'utf-8');
+
+    expect(source).toContain('online ? 30000 : 1500');
+    expect(source).toContain('pollNcmStatus();');
+    expect(source).not.toContain('setInterval(checkNcmStatus, 30000)');
+  });
+
+  it('confirms and deletes persisted chat history from the CHAT toolbar', () => {
+    const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
+    const chat = fs.readFileSync(path.resolve('frontend/js/chat.js'), 'utf-8');
+    const main = fs.readFileSync(path.resolve('frontend/js/main.js'), 'utf-8');
+
+    expect(html).toContain('id="clear-chat-btn"');
+    expect(html).toContain('id="clear-chat-modal"');
+    expect(html).toContain('播放历史、收藏和歌单不会受到影响');
+    expect(chat).toContain("fetch('/api/messages', { method: 'DELETE' })");
+    expect(chat).toContain('dom.chatMessages.replaceChildren()');
+    expect(main).toContain("target === 'chat' ? '' : 'none'");
+  });
+
+  it('uses a popover volume control and separated transport groups', () => {
+    const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
+    const audio = fs.readFileSync(path.resolve('frontend/js/audio-core.js'), 'utf-8');
+    const settings = fs.readFileSync(path.resolve('frontend/js/settings.js'), 'utf-8');
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+
+    expect(html).toContain('id="volume-btn"');
+    expect(html).toContain('id="volume-popover"');
+    expect((html.match(/class="transport-separator"/g) || [])).toHaveLength(2);
+    expect(audio).toContain("event.deltaY < 0 ? 5 : -5");
+    expect(settings).toContain("return (value || '').trim()");
+    expect(css).toContain('.volume-wrap:hover .volume-popover');
+    expect(css).toContain('.model-dropdown::-webkit-scrollbar-thumb');
+  });
+
+  it('renders now-playing messages with the dedicated double-note SVG', () => {
+    const chat = fs.readFileSync(path.resolve('frontend/js/chat.js'), 'utf-8');
+    const audio = fs.readFileSync(path.resolve('frontend/js/audio-core.js'), 'utf-8');
+
+    expect(chat).toContain("type === 'now-playing'");
+    expect(chat).toContain('className = \'now-playing-icon\'');
+    expect(audio).toContain("'now-playing'");
+    expect(audio).not.toContain('🎵 Now playing:');
   });
 });

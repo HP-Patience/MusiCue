@@ -1,6 +1,5 @@
-import { app, BrowserWindow, Menu, Tray, ipcMain, session, globalShortcut, screen } from 'electron';
+import { app, BrowserWindow, Menu, Tray, ipcMain, session, globalShortcut, screen, utilityProcess } from 'electron';
 import type http from 'node:http';
-import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -20,13 +19,20 @@ const { start } = require_('../../dist/server.js') as {
 let window: BrowserWindow | null = null;
 let quickInputWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
-let ncmProcess: ChildProcess | null = null;
+let ncmProcess: Electron.UtilityProcess | null = null;
 let shutdownServer: (() => Promise<void>) | null = null;
 let quitting = false;
 let quickInputAccelerator = 'CommandOrControl+Shift+Space';
 
+const hasSingleInstance = app.requestSingleInstanceLock();
+if (!hasSingleInstance) app.quit();
+
 function resourceRoot(): string {
-  return app.isPackaged ? path.join(process.resourcesPath, 'app') : path.resolve(__dirname, '../..');
+  return app.isPackaged ? app.getAppPath() : path.resolve(__dirname, '../..');
+}
+
+function externalResourceRoot(): string {
+  return app.isPackaged ? path.join(process.resourcesPath, 'app') : resourceRoot();
 }
 
 function dataDir(): string {
@@ -37,22 +43,37 @@ function dataDir(): string {
 }
 
 function startNcmApi(port: number): void {
-  const root = resourceRoot();
+  const root = externalResourceRoot();
   const apiDir = path.join(root, 'api-enhanced');
   if (!fs.existsSync(apiDir)) return;
 
   const log = fs.openSync(path.join(dataDir(), 'logs', 'ncm-api.log'), 'a');
-  ncmProcess = spawn(process.execPath, ['app.js'], {
+  ncmProcess = utilityProcess.fork(path.join(apiDir, 'app.js'), [], {
     cwd: apiDir,
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', PORT: String(port) },
-    stdio: ['ignore', log, log],
-    windowsHide: true,
+    env: { ...process.env, PORT: String(port) },
+    stdio: 'pipe',
+    serviceName: 'Claudio NetEase API',
+  });
+  ncmProcess.stdout?.on('data', (chunk) => {
+    fs.writeSync(log, chunk);
+  });
+  ncmProcess.stderr?.on('data', (chunk) => {
+    fs.writeSync(log, chunk);
+  });
+  ncmProcess.on('error', (_type, location, report) => {
+    console.error('[ncm-api] failed to start:', location, report);
+  });
+  ncmProcess.on('exit', (code) => {
+    fs.closeSync(log);
+    if (!quitting && code !== 0) {
+      console.error(`[ncm-api] exited unexpectedly (code=${code})`);
+    }
   });
 }
 
 async function createWindow(url: string): Promise<void> {
   window = new BrowserWindow({
-    width: 542,
+    width: 576,
     height: 753,
     useContentSize: true,
     resizable: true,
@@ -159,6 +180,12 @@ ipcMain.handle('window:minimize', () => {
   window?.minimize();
 });
 
+ipcMain.handle('window:pin', () => {
+  const pinned = !(window?.isAlwaysOnTop() ?? false);
+  window?.setAlwaysOnTop(pinned);
+  return { pinned };
+});
+
 ipcMain.handle('window:close', () => {
   window?.close();
 });
@@ -191,7 +218,7 @@ ipcMain.handle('quick-input:set-auto-launch', (_event, enabled: boolean) => {
   return { ok: true, enabled: !!enabled };
 });
 
-app.whenReady().then(async () => {
+if (hasSingleInstance) app.whenReady().then(async () => {
   Menu.setApplicationMenu(null);
 
   const claudioPort = await findAvailablePort(3005);
@@ -214,7 +241,6 @@ app.whenReady().then(async () => {
   createTray();
   await createWindow(`http://127.0.0.1:${claudioPort}`);
   await createQuickInputWindow(`http://127.0.0.1:${claudioPort}/quick-input.html`);
-  app.setLoginItemSettings({ openAtLogin: true, path: process.execPath });
   registerQuickInputShortcut(quickInputAccelerator);
 });
 

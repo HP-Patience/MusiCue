@@ -99,6 +99,8 @@ async function startQrLogin() {
 }
 
 // ── NCM status polling ──
+let ncmStatusTimer = null;
+
 async function checkNcmStatus() {
   dom.ncmStatus.className = 'ncm-status checking';
   try {
@@ -106,10 +108,18 @@ async function checkNcmStatus() {
     const data = await res.json();
     dom.ncmStatus.className = `ncm-status ${data.online ? 'online' : 'offline'}`;
     dom.ncmStatus.title = data.online ? '网易云 API 在线' : `网易云 API 离线: ${data.reason || 'unknown'}`;
+    return !!data.online;
   } catch {
     dom.ncmStatus.className = 'ncm-status offline';
     dom.ncmStatus.title = '网易云 API 状态检查失败';
+    return false;
   }
+}
+
+async function pollNcmStatus() {
+  const online = await checkNcmStatus();
+  if (ncmStatusTimer) clearTimeout(ncmStatusTimer);
+  ncmStatusTimer = setTimeout(pollNcmStatus, online ? 30000 : 1500);
 }
 
 export function init() {
@@ -250,6 +260,5 @@ export function init() {
 
   // NCM status check
   refreshNcmLoginStatus();
-  checkNcmStatus();
-  setInterval(checkNcmStatus, 30000);
+  pollNcmStatus();
 }

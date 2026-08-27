@@ -1,8 +1,13 @@
 const input = document.getElementById('quick-input');
 const quickInput = window.electronQuickInput;
 
+function syncTheme() {
+  document.documentElement.setAttribute('data-theme', localStorage.getItem('claudio-theme') || 'dark');
+}
+
 function focusInput() {
   if (!input) return;
+  syncTheme();
   input.value = '';
   requestAnimationFrame(() => input.focus());
 }
@@ -28,4 +33,5 @@ input?.addEventListener('keydown', (event) => {
 });
 
 window.addEventListener('DOMContentLoaded', focusInput);
+window.addEventListener('storage', syncTheme);
 quickInput?.onFocus?.(focusInput);

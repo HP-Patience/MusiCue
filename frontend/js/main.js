@@ -60,6 +60,19 @@ document.getElementById('window-minimize')?.addEventListener('click', (event) =>
   event.stopPropagation();
   runWindowAction('minimize');
 });
+document.getElementById('window-pin')?.addEventListener('click', async (event) => {
+  event.stopPropagation();
+  if (!electronWindow?.pin) return;
+  const button = event.currentTarget;
+  try {
+    const { pinned } = await electronWindow.pin();
+    button.classList.toggle('active', pinned);
+    button.setAttribute('aria-pressed', String(pinned));
+    button.title = pinned ? '取消固定' : '固定窗口';
+  } catch (error) {
+    console.warn('[window-controls] pin failed', error);
+  }
+});
 document.getElementById('window-close')?.addEventListener('click', (event) => {
   event.stopPropagation();
   runWindowAction('quit');
@@ -89,6 +102,7 @@ document.querySelectorAll('.chat-tab').forEach(tab => {
     dom.statsPanel.classList.toggle('active', target === 'stats');
     dom.playlistsPanel.classList.toggle('active', target === 'playlists');
     dom.historyPanel.classList.toggle('active', target === 'history');
+    dom.clearChatBtn.style.display = target === 'chat' ? '' : 'none';
     if (target === 'queue') queuePanel.renderQueuePanel();
     if (target === 'favs') favsPanel.renderFavsPanel();
     if (target === 'stats') statsPanel.renderStatsPanel();
@@ -101,9 +115,6 @@ document.querySelectorAll('.chat-tab').forEach(tab => {
 document.addEventListener('click', (e) => {
   if (dom.addToPlaylistDropdown && !dom.addToPlaylistBtn.contains(e.target) && !dom.addToPlaylistDropdown.contains(e.target)) {
     dom.addToPlaylistDropdown.style.display = 'none';
-  }
-  if (dom.playModeDropdown && !dom.playModeBtn.contains(e.target) && !dom.playModeDropdown.contains(e.target)) {
-    dom.playModeDropdown.style.display = 'none';
   }
   if (dom.modelDropdown && !dom.modelDropdown.contains(e.target) && !dom.settingsFetchModels.contains(e.target)) {
     dom.modelDropdown.classList.remove('open');

@@ -10,7 +10,7 @@ import { setWeatherKey } from './adapters/weather.js';
 import { setFeishuConfig } from './adapters/feishu.js';
 import { setUpnpDevices } from './adapters/upnp.js';
 import { setFishKey } from './tts.js';
-import { startTriggerLoop, getCachedCoords } from './triggers.js';
+import { startTriggerLoop, stopTriggerLoop, getCachedCoords } from './triggers.js';
 import { resolveAppFile, resolveRuntimeFile } from './runtime.js';
 import { getNcmCookie } from './adapters/netease.js';
 import path from 'node:path';
@@ -89,6 +89,7 @@ export async function start(options: StartOptions = {}) {
       const shutdown = async () => {
         return new Promise<void>((resolveClose) => {
           server.close(() => {
+            stopTriggerLoop();
             db.close();
             resolveClose();
           });

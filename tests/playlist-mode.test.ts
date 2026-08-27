@@ -34,4 +34,31 @@ describe('playlist internal playback mode', () => {
     expect(css).toContain('.playlist-mode-btn.active');
     expect(wsSource).toContain('exitPlaylistMode({ silent: true })');
   });
+
+  it('keeps playlist cards at full height so the panel can scroll', () => {
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+
+    expect(css).toMatch(/\.playlist-card\s*\{[^}]*flex-shrink:\s*0/s);
+    expect(css).toMatch(/\.playlist-create-bar\s*\{[^}]*flex-shrink:\s*0/s);
+  });
+
+  it('uses the playlists panel as the single detail scroll container', () => {
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+
+    expect(css).toMatch(/\.playlists-panel\s*\{[^}]*overflow-y:\s*auto/s);
+    expect(css).toMatch(/\.playlist-tracks\s*\{[^}]*overflow:\s*visible/s);
+    expect(css).not.toContain('.playlist-tracks::-webkit-scrollbar');
+  });
+
+  it('cycles playback modes directly without a dropdown', () => {
+    const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
+    const modeSource = fs.readFileSync(path.resolve('frontend/js/playmode.js'), 'utf-8');
+    const audioSource = fs.readFileSync(path.resolve('frontend/js/audio-core.js'), 'utf-8');
+
+    expect(html).not.toContain('playmode-dropdown');
+    expect(modeSource).toContain("const modes = ['list', 'single', 'shuffle']");
+    expect(modeSource).toContain('setPlayMode(modes[(current + 1) % modes.length])');
+    expect(audioSource).toContain("list: ICONS.repeat, single: ICONS.single");
+    expect(audioSource).toContain("list: '列表循环', single: '单曲循环', shuffle: '随机播放'");
+  });
 });

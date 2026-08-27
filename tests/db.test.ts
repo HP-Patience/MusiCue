@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from 'better-sqlite3';
-import { initDb, addMessage, getMessages, addPlay, getRecentPlays, getPlayHistory, setPlan, getPlan, setPref, getPref, cleanup } from '../src/db.js';
+import { initDb, addMessage, getMessages, clearMessages, addPlay, getRecentPlays, getPlayHistory, setPlan, getPlan, setPref, getPref, cleanup } from '../src/db.js';
 import fs from 'node:fs';
 
 describe('db', () => {
@@ -42,6 +42,17 @@ describe('db', () => {
     expect(msgs[0].content).toBe('hi there');
     expect(msgs[1].role).toBe('user');
     expect(msgs[1].content).toBe('hello');
+  });
+
+  it('clearMessages removes chat while preserving playback history', () => {
+    addMessage(db, { role: 'user', content: 'play jazz' });
+    addMessage(db, { role: 'assistant', content: 'playing jazz' });
+    addPlay(db, { song_id: '123', song_name: 'Test Song', artist: 'Test Artist' });
+
+    clearMessages(db);
+
+    expect(getMessages(db, 10)).toEqual([]);
+    expect(getRecentPlays(db, 10)).toHaveLength(1);
   });
 
   it('addPlay inserts and getRecentPlays returns plays ordered by time desc', () => {

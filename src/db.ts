@@ -81,6 +81,10 @@ export function getMessages(db: Database.Database, limit: number) {
     .all(limit) as { role: string; content: string; created_at: string }[];
 }
 
+export function clearMessages(db: Database.Database): void {
+  db.prepare('DELETE FROM messages').run();
+}
+
 export interface Play {
   song_id: string;
   song_name: string;

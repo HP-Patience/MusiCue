@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronWindow', {
   minimize: () => ipcRenderer.invoke('window:minimize'),
+  pin: () => ipcRenderer.invoke('window:pin'),
   close: () => ipcRenderer.invoke('window:close'),
   quit: () => ipcRenderer.invoke('window:quit'),
 });

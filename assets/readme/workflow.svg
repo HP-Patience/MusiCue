@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">Claudio FM request workflow</title>
+  <desc id="desc">Claudio collects local context, asks an LLM for structured actions, and executes music, voice, and device output.</desc>
+  <rect width="1200" height="420" rx="24" fill="#f5f0e8"/>
+  <text x="56" y="62" fill="#191411" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="32" font-weight="700">One request, one auditable route</text>
+  <text x="56" y="94" fill="#76695f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">CONTEXT → DECISION → EXECUTION</text>
+
+  <g transform="translate(56 138)">
+    <rect width="300" height="190" rx="14" fill="#fffaf4" stroke="#d5c8ba" stroke-width="2"/>
+    <circle cx="30" cy="32" r="8" fill="#e76f51"/>
+    <text x="52" y="39" fill="#191411" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">01 / COLLECT</text>
+    <text x="28" y="82" fill="#191411" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="24" font-weight="600">Your situation</text>
+    <text x="28" y="118" fill="#76695f" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="18">taste, routine, weather,</text>
+    <text x="28" y="146" fill="#76695f" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="18">calendar, time, history</text>
+    <path d="M28 168H180" stroke="#e76f51" stroke-width="3"/>
+  </g>
+
+  <path d="M382 232H430" stroke="#d4a373" stroke-width="3"/>
+  <path d="M420 222L432 232L420 242" fill="none" stroke="#d4a373" stroke-width="3"/>
+
+  <g transform="translate(450 138)">
+    <rect width="300" height="190" rx="14" fill="#191411" stroke="#3b3028" stroke-width="2"/>
+    <circle cx="30" cy="32" r="8" fill="#d4a373"/>
+    <text x="52" y="39" fill="#f5f0e8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">02 / DECIDE</text>
+    <text x="28" y="82" fill="#f5f0e8" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="24" font-weight="600">LLM as DJ</text>
+    <text x="28" y="118" fill="#b7aaa0" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="18">structured JSON actions:</text>
+    <text x="28" y="146" fill="#d4a373" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">say / play / segue / reason</text>
+    <path d="M28 168H180" stroke="#d4a373" stroke-width="3"/>
+  </g>
+
+  <path d="M776 232H824" stroke="#d4a373" stroke-width="3"/>
+  <path d="M814 222L826 232L814 242" fill="none" stroke="#d4a373" stroke-width="3"/>
+
+  <g transform="translate(844 138)">
+    <rect width="300" height="190" rx="14" fill="#fffaf4" stroke="#d5c8ba" stroke-width="2"/>
+    <circle cx="30" cy="32" r="8" fill="#1e9e78"/>
+    <text x="52" y="39" fill="#191411" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">03 / EXECUTE</text>
+    <text x="28" y="82" fill="#191411" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="24" font-weight="600">The room responds</text>
+    <text x="28" y="118" fill="#76695f" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="18">music, DJ voice, smart</text>
+    <text x="28" y="146" fill="#76695f" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="18">speakers, live UI state</text>
+    <path d="M28 168H180" stroke="#1e9e78" stroke-width="3"/>
+  </g>
+
+  <text x="56" y="380" fill="#76695f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">LOCAL STATE / SQLITE MEMORY / WEBSOCKET STREAM</text>
+</svg>
