@@ -6,12 +6,14 @@ let qrKey = null;
 let qrPollTimer = null;
 
 export function updateLoginBtn() {
+  const label = document.getElementById('ncm-login-label');
+  if (!label) return;
   if (state.ncmLoggedIn) {
     const vip = state.ncmVipType && state.ncmVipType > 0 ? ' ★VIP' : '';
-    dom.ncmLoginBtn.textContent = (state.ncmNickname || 'LOGGED') + vip;
+    label.textContent = (state.ncmNickname || 'LOGGED') + vip;
     dom.ncmLoginBtn.classList.add('logged-in');
   } else {
-    dom.ncmLoginBtn.textContent = 'LOGIN';
+    label.textContent = 'LOGIN';
     dom.ncmLoginBtn.classList.remove('logged-in');
   }
 }

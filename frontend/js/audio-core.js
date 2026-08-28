@@ -8,6 +8,7 @@ import { updateLyrics, parseLRC } from './lyrics.js';
 // ── cross-module refs (set by main.js) ──
 let addChatMessage = () => {};
 let refreshQueuePanel = () => {};
+let playlistModeGeneration = 0;
 
 export function link(_addChatMessage, _refreshQueuePanel) {
   addChatMessage = _addChatMessage;
@@ -142,22 +143,38 @@ export async function enterPlaylistMode({ id, name, tracks, startIndex = 0 }) {
   state.isFmMode = false;
   state.isSmartMode = false;
   state.isPlaylistMode = true;
+  const generation = ++playlistModeGeneration;
   state.playlistModeMeta = { id, name };
   state.playlistQueue = items.slice(safeStart).concat(items.slice(0, safeStart));
   state._playlistShuffleHistory = [];
   await resolveItemUrl(state.playlistQueue[0]);
-  playTrack(state.playlistQueue[0]);
+  if (!state.isPlaylistMode || generation !== playlistModeGeneration) return;
+  playTrack(state.playlistQueue[0], { fromPlaylist: true });
   updateModeDisplay();
   showModeToast('歌单内播放');
 }
 
-export function exitPlaylistMode({ silent } = {}) {
+export function exitPlaylistMode({ silent, preserveCurrent = true } = {}) {
+  const wasPlaylistMode = state.isPlaylistMode;
+  playlistModeGeneration++;
   state.isPlaylistMode = false;
+  if (wasPlaylistMode && preserveCurrent && state.currentTrack) {
+    const currentIndex = state.queue.findIndex(item => item.songId === state.currentTrack.songId);
+    if (currentIndex >= 0) state.queue.splice(currentIndex, 1);
+    state.queue.unshift(state.currentTrack);
+  }
   state.playlistQueue = [];
   state.playlistModeMeta = null;
   state._playlistShuffleHistory = [];
+  refreshPlaybackQueueUi();
   updateModeDisplay();
   if (!silent) showModeToast('已退出歌单模式');
+}
+
+export function removePlaylistTrack(songId) {
+  playlistModeGeneration++;
+  state.playlistQueue = state.playlistQueue.filter(item => Number(item.songId) !== Number(songId));
+  if (state.isPlaylistMode && state.playlistQueue.length === 0) exitPlaylistMode({ silent: true });
 }
 
 export function updateModeDisplay() {
@@ -187,7 +204,10 @@ export function updatePlayModeUI() {
 
 export function setPlayMode(mode) {
   state.playMode = mode;
-  if (mode !== 'shuffle') state._shuffleHistory = [];
+  if (mode !== 'shuffle') {
+    state._shuffleHistory = [];
+    state._playlistShuffleHistory = [];
+  }
   localStorage.setItem('claudio-playmode', mode);
   updatePlayModeUI();
 }
@@ -213,8 +233,11 @@ function recordConfirmedPlayback(item, token, expectedUrl) {
     .catch(() => {});
 }
 
-export function playTrack(item) {
+export function playTrack(item, { fromPlaylist = false } = {}) {
   if (!item || !item.url) return Promise.resolve();
+  if (state.isPlaylistMode && !fromPlaylist) {
+    exitPlaylistMode({ silent: true, preserveCurrent: false });
+  }
   const token = ++playRequestToken;
   const audioUrl = resolveAudioUrl(item.url);
   state.currentTrack = item;
@@ -233,10 +256,11 @@ export function playTrack(item) {
   }
 
   if (dom.arcIndicator) {
-    const trackIdx = state.queue.findIndex(t => t.songId === item.songId);
+    const activeQueue = getPlaybackQueue();
+    const trackIdx = activeQueue.findIndex(t => t.songId === item.songId);
     const totalSteps = state._arcSteps || 0;
     if (totalSteps > 1 && trackIdx >= 0) {
-      dom.arcIndicator.textContent = `情绪过渡 ${trackIdx + 1}/${Math.min(totalSteps, state.queue.length)}`;
+      dom.arcIndicator.textContent = `情绪过渡 ${trackIdx + 1}/${Math.min(totalSteps, activeQueue.length)}`;
       dom.arcIndicator.style.display = '';
     } else {
       dom.arcIndicator.style.display = 'none';
@@ -320,10 +344,17 @@ export async function nextTrack() {
     return;
   }
   const queue = getPlaybackQueue();
+  const playlistGeneration = state.isPlaylistMode ? playlistModeGeneration : null;
   const shuffleHistory = getShuffleHistory();
   if (queue.length === 0) return;
   if (!state.isSmartMode && state.playMode === 'single') {
     replayCurrentTrack();
+    return;
+  }
+  if (!state.isSmartMode && queue.length === 1) {
+    await resolveItemUrl(queue[0]);
+    if (playlistGeneration !== null && (!state.isPlaylistMode || playlistGeneration !== playlistModeGeneration)) return;
+    playTrack(queue[0], { fromPlaylist: state.isPlaylistMode });
     return;
   }
   if (!state.isSmartMode && state.playMode === 'shuffle' && queue.length > 1) {
@@ -332,7 +363,8 @@ export async function nextTrack() {
     const next = queue.splice(rndIdx, 1)[0];
     queue.unshift(next);
     await resolveItemUrl(queue[0]);
-    playTrack(queue[0]);
+    if (playlistGeneration !== null && (!state.isPlaylistMode || playlistGeneration !== playlistModeGeneration)) return;
+    playTrack(queue[0], { fromPlaylist: state.isPlaylistMode });
     refreshPlaybackQueueUi();
     return;
   }
@@ -340,7 +372,8 @@ export async function nextTrack() {
     const next = queue.shift();
     queue.push(next);
     await resolveItemUrl(queue[0]);
-    playTrack(queue[0]);
+    if (playlistGeneration !== null && (!state.isPlaylistMode || playlistGeneration !== playlistModeGeneration)) return;
+    playTrack(queue[0], { fromPlaylist: state.isPlaylistMode });
     refreshPlaybackQueueUi();
   }
 }
@@ -351,10 +384,17 @@ export async function prevTrack() {
     return;
   }
   const queue = getPlaybackQueue();
+  const playlistGeneration = state.isPlaylistMode ? playlistModeGeneration : null;
   const shuffleHistory = getShuffleHistory();
   if (queue.length === 0) return;
   if (!state.isSmartMode && state.playMode === 'single') {
     replayCurrentTrack();
+    return;
+  }
+  if (!state.isSmartMode && queue.length === 1) {
+    await resolveItemUrl(queue[0]);
+    if (playlistGeneration !== null && (!state.isPlaylistMode || playlistGeneration !== playlistModeGeneration)) return;
+    playTrack(queue[0], { fromPlaylist: state.isPlaylistMode });
     return;
   }
   if (!state.isSmartMode && state.playMode === 'shuffle') {
@@ -364,7 +404,8 @@ export async function prevTrack() {
       if (dupIdx >= 0) queue.splice(dupIdx, 1);
       queue.unshift(prev);
       await resolveItemUrl(queue[0]);
-      playTrack(queue[0]);
+      if (playlistGeneration !== null && (!state.isPlaylistMode || playlistGeneration !== playlistModeGeneration)) return;
+      playTrack(queue[0], { fromPlaylist: state.isPlaylistMode });
       refreshPlaybackQueueUi();
     } else {
       replayCurrentTrack();
@@ -375,7 +416,8 @@ export async function prevTrack() {
     const prev = queue.pop();
     queue.unshift(prev);
     await resolveItemUrl(queue[0]);
-    playTrack(queue[0]);
+    if (playlistGeneration !== null && (!state.isPlaylistMode || playlistGeneration !== playlistModeGeneration)) return;
+    playTrack(queue[0], { fromPlaylist: state.isPlaylistMode });
     refreshPlaybackQueueUi();
   }
 }

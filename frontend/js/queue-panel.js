@@ -2,7 +2,7 @@
 import { state } from './state.js';
 import { dom } from './dom.js';
 import { ICONS } from './icons.js';
-import { resolveItemUrl, playTrack } from './audio-core.js';
+import { resolveItemUrl, playTrack, exitPlaylistMode } from './audio-core.js';
 
 export function refreshQueuePanel() {
   const panel = dom.queuePanel;
@@ -37,6 +37,7 @@ export function refreshQueuePanel() {
       playBtn.title = 'Play now';
       playBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
+        if (state.isPlaylistMode) exitPlaylistMode({ silent: true, preserveCurrent: false });
         await resolveItemUrl(state.queue[idx]);
         const [moved] = state.queue.splice(idx, 1);
         state.queue.unshift(moved);
@@ -52,6 +53,7 @@ export function refreshQueuePanel() {
     rmBtn.title = idx === 0 ? 'Stop' : 'Remove';
     rmBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
+      if (state.isPlaylistMode) exitPlaylistMode({ silent: true, preserveCurrent: false });
       const audio = (await import('./audio-core.js')).audio;
       state.queue.splice(idx, 1);
       dom.queueCount.textContent = String(state.queue.length);

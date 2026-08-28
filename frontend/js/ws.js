@@ -30,7 +30,7 @@ export function connectWs() {
         switch (msg.type) {
           case 'play':
             if (msg.payload?.tracks) {
-              if (state.isPlaylistMode) exitPlaylistMode({ silent: true });
+              if (state.isPlaylistMode) exitPlaylistMode({ silent: true, preserveCurrent: false });
               const becameFm = !!msg.payload.fm && !state.isFmMode;
               const becameSmart = !!msg.payload.smart && !state.isSmartMode;
               state.isFmMode = !!msg.payload.fm;

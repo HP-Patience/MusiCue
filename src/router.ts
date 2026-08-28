@@ -220,7 +220,14 @@ Only use play_mode when user explicitly asks for these features. Otherwise omit 
   "arc": { "start": "slow|mid|high", "end": "slow|mid|high", "steps": 3 }
 }`;
 
-    const result = await invokeClaude(fullPrompt, { db: opts.db });
+     let result = await invokeClaude(fullPrompt, { db: opts.db });
+     if (result.error) {
+       result = await invokeClaude(`${fullPrompt}\n\nYour previous response violated the JSON contract. Return a JSON object with string "say" and string-array "play" fields. Output JSON only.`, { db: opts.db });
+     }
+     if (result.error) {
+       res.status(502).json({ say: '抱歉，DJ 返回了无效指令，请再试一次。', play: [], reason: '', segue: '', claude: false, error: true });
+       return;
+     }
 
     if (result.usage) {
       broadcast('token_usage', result.usage);

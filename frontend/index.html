@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Unbounded:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23d4a373'/><text x='50' y='62' text-anchor='middle' font-size='36' fill='%23181310'>♪</text></svg>" />
+  <link rel="icon" href="/icons/music-note.svg" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -17,19 +17,20 @@
     <nav class="nav">
       <div class="nav-left">
         <div class="nav-avatar">
-          <img class="nav-logo-light" src="/icons/nav-logo.png" alt="Claudio" />
-          <img class="nav-logo-dark" src="/icons/nav-logo-dark.png" alt="" aria-hidden="true" />
+          <img class="nav-logo-light" src="/icons/music-note.svg" alt="Claudio" />
+          <img class="nav-logo-dark" src="/icons/music-note.svg" alt="" aria-hidden="true" />
         </div>
         <span class="nav-title">Claudio</span>
       </div>
       <div class="nav-actions">
-        <button class="nav-btn" id="ncm-login-btn" title="网易云登录">LOGIN</button>
+        <button class="nav-btn login-btn" id="ncm-login-btn" title="网易云登录"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.001 22c-5.523 0-10-4.477-10-10s4.477-10 10-10s10 4.477 10 10s-4.477 10-10 10m-1.086-10.432c.24-.84 1.075-1.541 1.99-1.648c.187.694.388 1.373.545 2.063c.053.23.037.495-.018.727c-.213.892-1.248 1.242-1.978.685c-.53-.405-.742-1.12-.539-1.827m3.817-.197c-.125-.465-.256-.927-.393-1.42c.5.13.907.36 1.255.697c1.257 1.222 1.385 3.3.294 4.732c-1.135 1.49-3.155 2.134-5.028 1.605c-2.302-.65-3.808-2.952-3.441-5.316c.274-1.768 1.27-3.004 2.9-3.733c.407-.182.58-.56.42-.93c-.157-.364-.54-.504-.944-.343c-2.721 1.088-4.32 4.134-3.67 6.987c.713 3.118 3.495 5.163 6.675 4.859c1.732-.166 3.164-.948 4.216-2.347c1.506-2.002 1.297-4.783-.463-6.499c-.666-.65-1.471-1.018-2.39-1.153c-.083-.013-.217-.052-.232-.106c-.087-.313-.18-.632-.206-.954c-.029-.357.29-.64.65-.645c.253-.003.434.13.603.3c.303.3.704.322.988.062c.29-.264.296-.678.018-1.008c-.566-.672-1.586-.891-2.43-.523c-.847.37-1.321 1.187-1.2 2.093c.038.28.11.557.167.842l-.26.072a3.86 3.86 0 0 0-2.098 1.414c-.921 1.22-.936 2.828-.041 3.947c1.274 1.594 3.747 1.284 4.523-.568c.284-.677.275-1.368.087-2.065"/></svg><span id="ncm-login-label">LOGIN</span></button>
         <button class="nav-btn bell-btn" id="bell-btn" title="场景建议" style="display:none">
           <span id="bell-badge" class="bell-badge" style="display:none">0</span>
           🔔
         </button>
         <button class="nav-btn" id="theme-toggle" title="切换到浅色模式" aria-label="切换到浅色模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 20h6v2H9zm-.83-4.95c.41.62.62 1.36.72 1.95H8v2h8v-2h-.89c.11-.59.31-1.33.72-1.95c.36-.54.76-1.01 1.14-1.46c1-1.18 2.03-2.39 2.03-4.6c0-3.86-3.14-7-7-7s-7 3.14-7 7c0 2.21 1.03 3.42 2.02 4.58c.39.45.78.92 1.15 1.47ZM12 4c2.76 0 5 2.24 5 5c0 1.47-.62 2.2-1.55 3.3c-.4.47-.85 1-1.28 1.64c-.68 1.03-.97 2.23-1.09 3.06h-2.17c-.12-.83-.4-2.03-1.08-3.05c-.43-.65-.89-1.19-1.29-1.66C7.61 11.2 7 10.48 7 9c0-2.76 2.24-5 5-5"/></svg></button>
         <button class="nav-btn" id="settings-toggle" title="设置" aria-label="设置"><svg viewBox="0 0 1024 1024" aria-hidden="true"><path fill="currentColor" d="M512.5 390.6c-29.9 0-57.9 11.6-79.1 32.8c-21.1 21.2-32.8 49.2-32.8 79.1s11.7 57.9 32.8 79.1c21.2 21.1 49.2 32.8 79.1 32.8s57.9-11.7 79.1-32.8c21.1-21.2 32.8-49.2 32.8-79.1s-11.7-57.9-32.8-79.1a110.96 110.96 0 0 0-79.1-32.8m412.3 235.5l-65.4-55.9c3.1-19 4.7-38.4 4.7-57.7s-1.6-38.8-4.7-57.7l65.4-55.9a32.03 32.03 0 0 0 9.3-35.2l-.9-2.6a442.5 442.5 0 0 0-79.6-137.7l-1.8-2.1a32.12 32.12 0 0 0-35.1-9.5l-81.2 28.9c-30-24.6-63.4-44-99.6-57.5l-15.7-84.9a32.05 32.05 0 0 0-25.8-25.7l-2.7-.5c-52-9.4-106.8-9.4-158.8 0l-2.7.5a32.05 32.05 0 0 0-25.8 25.7l-15.8 85.3a353.4 353.4 0 0 0-98.9 57.3l-81.8-29.1a32 32 0 0 0-35.1 9.5l-1.8 2.1a445.9 445.9 0 0 0-79.6 137.7l-.9 2.6c-4.5 12.5-.8 26.5 9.3 35.2l66.2 56.5c-3.1 18.8-4.6 38-4.6 57c0 19.2 1.5 38.4 4.6 57l-66 56.5a32.03 32.03 0 0 0-9.3 35.2l.9 2.6c18.1 50.3 44.8 96.8 79.6 137.7l1.8 2.1a32.12 32.12 0 0 0 35.1 9.5l81.8-29.1c29.8 24.5 63 43.9 98.9 57.3l15.8 85.3a32.05 32.05 0 0 0 25.8 25.7l2.7.5a448.3 448.3 0 0 0 158.8 0l2.7-.5a32.05 32.05 0 0 0 25.8-25.7l15.7-84.9c36.2-13.6 69.6-32.9 99.6-57.5l81.2 28.9a32 32 0 0 0 35.1-9.5l1.8-2.1c34.8-41.1 61.5-87.4 79.6-137.7l.9-2.6c4.3-12.4.6-26.3-9.5-35m-412.3 52.2c-97.1 0-175.8-78.7-175.8-175.8s78.7-175.8 175.8-175.8s175.8 78.7 175.8 175.8s-78.7 175.8-175.8 175.8"/></svg></button>
+        <a class="nav-btn github-btn" href="https://github.com/HP-Patience/Claudio" target="_blank" rel="noreferrer" title="GitHub" aria-label="打开 GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385c.6.105.825-.255.825-.57c0-.285-.015-1.23-.015-2.235c-3.015.555-3.795-.735-4.035-1.41c-.135-.345-.72-1.41-1.23-1.695c-.42-.225-1.02-.78-.015-.795c.945-.015 1.62.87 1.845 1.23c1.08 1.815 2.805 1.305 3.495.99c.105-.78.42-1.305.765-1.605c-2.67-.3-5.46-1.335-5.46-5.925c0-1.305.465-2.385 1.23-3.225c-.12-.3-.54-1.53.12-3.18c0 0 1.005-.315 3.3 1.23c.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23c.66 1.65.24 2.88.12 3.18c.765.84 1.23 1.905 1.23 3.225c0 4.605-2.805 5.625-5.475 5.925c.435.375.81 1.095.81 2.22c0 1.605-.015 2.895-.015 3.3c0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12" clip-rule="evenodd"/></svg></a>
         <div class="window-controls" aria-label="窗口控制">
           <span class="window-control-separator" aria-hidden="true"></span>
           <button class="window-control-btn" id="window-pin" title="固定窗口" aria-label="固定窗口" aria-pressed="false"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588c-.177 0-.335-.018-.46-.039l-3.134 3.134a6 6 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828l-3.182 3.182c-.195.195-1.219.902-1.414.707s.512-1.22.707-1.414l3.182-3.182l-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a6 6 0 0 1 1.013.16l3.134-3.133a3 3 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146m.122 2.112v-.002zm0-.002v.002a.5.5 0 0 1-.122.51L6.293 6.878a.5.5 0 0 1-.511.12H5.78l-.014-.004a5 5 0 0 0-.288-.076a5 5 0 0 0-.765-.116c-.422-.028-.836.008-1.175.15l5.51 5.509c.141-.34.177-.753.149-1.175a5 5 0 0 0-.192-1.054l-.004-.013v-.001a.5.5 0 0 1 .12-.512l3.536-3.535a.5.5 0 0 1 .532-.115l.096.022c.087.017.208.034.344.034q.172.002.343-.04L9.927 2.028q-.042.172-.04.343a1.8 1.8 0 0 0 .062.46z"/></svg></button>
@@ -91,7 +92,7 @@
           <div class="transport-right">
             <button class="ctrl-btn text" id="similar-btn" title="相似推荐"><svg viewBox="0 0 14 14" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4.638 13.428a1.497 1.497 0 1 0 0-2.995a1.497 1.497 0 0 0 0 2.995m6.739-1.872a1.497 1.497 0 1 0 0-2.994a1.497 1.497 0 0 0 0 2.994"/><path d="M12.874 10.059v-5.87a.374.374 0 0 0-.472-.359l-2.995.831m3.467 1.28L7.42 7.456M4.762 2.597c.445-.601.719-1.83.719-1.83s.274 1.229.718 1.83c.449.606 1.878 1.136 1.878 1.136s-1.43.53-1.878 1.137c-.444.6-.718 1.829-.718 1.829s-.274-1.228-.719-1.83c-.448-.605-1.877-1.136-1.877-1.136s1.429-.53 1.877-1.136m1.374 9.333V8.892M2.007 6.623v2.268M.873 7.757h2.268"/></g></svg></button>
             <div class="add-to-playlist-wrap">
-              <button class="ctrl-btn text" id="add-to-playlist-btn" title="添加到歌单"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9.175 19.825Q8 18.65 8 17t1.175-2.825T12 13q.575 0 1.063.138t.937.412V4q0-.425.288-.712T15 3h4q.425 0 .713.288T20 4v2q0 .425-.288.713T19 7h-3v10q0 1.65-1.175 2.825T12 21t-2.825-1.175M7 8H5q-.425 0-.712-.288T4 7t.288-.712T5 6h2V4q0-.425.288-.712T8 3t.713.288T9 4v2h2q.425 0 .713.288T12 7t-.288.713T11 8H9v2q0 .425-.288.713T8 11t-.712-.288T7 10z"/></svg></button>
+              <button class="ctrl-btn text" id="add-to-playlist-btn" title="添加到歌单"><svg viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M64 64h64v42.667H64zm0 106.667h64v42.666H64zm64 106.666H64V320h64zM170.667 64H448v42.667H170.667zM448 170.667H170.667v42.666H448zM170.667 277.333h170.666V320H170.667zm320 106.667h-64v-64H384v64h-64v42.667h64v64h42.667v-64h64z" clip-rule="evenodd"/></svg></button>
               <div class="add-to-playlist-dropdown" id="add-to-playlist-dropdown" style="display:none"></div>
             </div>
           </div>
@@ -142,7 +143,7 @@
     <section class="input-section">
       <div class="input-row">
         <input type="text" id="chat-input" placeholder="Say something to the DJ …" autocomplete="off" />
-        <button class="send-btn" id="send-btn">↑</button>
+        <button class="send-btn" id="send-btn" title="发送" aria-label="发送"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.912 12H4L2.023 4.135A.7.7 0 0 1 2 3.995c-.022-.721.772-1.221 1.46-.891L22 12L3.46 20.896c-.68.327-1.464-.159-1.46-.867a.7.7 0 0 1 .033-.186L3.5 15"/></svg></button>
       </div>
     </section>
 

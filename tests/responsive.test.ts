@@ -151,6 +151,50 @@ describe('responsive frontend layout', () => {
     expect(await lastTrack.isVisible()).toBe(true);
   });
 
+  it('keeps playlist playback state consistent across navigation and exit', async () => {
+    await page.setViewportSize({ width: 620, height: 800 });
+    await page.goto(baseUrl);
+    const result = await page.evaluate(async () => window.eval(`(async () => {
+      const { state } = await import('/js/state.js');
+      const core = await import('/js/audio-core.js');
+      const one = { songId: '1', name: 'One', artist: 'A', url: 'data:audio/mp3;base64,' };
+      state.queue = [];
+      state.currentTrack = null;
+      state.isPlaylistMode = true;
+      state.playlistModeMeta = { id: 1, name: 'Single' };
+      state.playlistQueue = [one];
+      state.playMode = 'list';
+      await core.nextTrack();
+      const singleRepeated = state.currentTrack?.songId === '1';
+
+      const regular = { songId: '9', name: 'Regular', artist: 'R', url: 'data:audio/mp3;base64,' };
+      core.playTrack(regular);
+      const regularExitedPlaylist = !state.isPlaylistMode && state.playlistQueue.length === 0;
+
+      state.isPlaylistMode = true;
+      state.playlistModeMeta = { id: 2, name: 'Delete' };
+      state.playlistQueue = [one, { ...regular, songId: '2' }];
+      core.removePlaylistTrack('2');
+      const deleteSynced = state.playlistQueue.length === 1 && state.playlistQueue[0].songId === '1';
+
+      state.queue = [regular];
+      state.currentTrack = one;
+      state.isPlaylistMode = true;
+      state.playlistModeMeta = { id: 3, name: 'Exit' };
+      state.playlistQueue = [one];
+      core.exitPlaylistMode({ silent: true });
+      const exitPreservedCurrent = state.queue[0]?.songId === '1' && !state.isPlaylistMode;
+      return { singleRepeated, regularExitedPlaylist, deleteSynced, exitPreservedCurrent };
+    })()`));
+
+    expect(result).toEqual({
+      singleRepeated: true,
+      regularExitedPlaylist: true,
+      deleteSynced: true,
+      exitPreservedCurrent: true,
+    });
+  });
+
   it('supports quick input focus, submit, and escape close', async () => {
     await page.setViewportSize({ width: 760, height: 88 });
     await page.addInitScript(() => {

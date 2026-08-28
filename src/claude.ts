@@ -27,9 +27,12 @@ export function parseOutput(raw: string): ClaudeOutput {
   if (jsonMatch) {
     try {
       const parsed = JSON.parse(jsonMatch[0]);
+      if (!parsed || typeof parsed !== 'object' || typeof parsed.say !== 'string' || !Array.isArray(parsed.play) || !parsed.play.every((item: unknown) => typeof item === 'string')) {
+        return { say: '', play: [], reason: '', segue: '', error: true, raw };
+      }
       return {
-        say: parsed.say ?? raw,
-        play: parsed.play ?? [],
+        say: parsed.say,
+        play: parsed.play,
         play_mode: parsed.play_mode,
         play_mode_params: parsed.play_mode_params,
         reason: parsed.reason ?? '',
@@ -42,7 +45,7 @@ export function parseOutput(raw: string): ClaudeOutput {
     }
   }
   // Plain text response: use as say
-  return { say: raw, play: [], reason: '', segue: '' };
+  return { say: '', play: [], reason: '', segue: '', error: true, raw };
 }
 
 interface InvokeOptions {

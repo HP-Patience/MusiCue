@@ -4,6 +4,14 @@ import { dom } from './dom.js';
 
 let lastAiText = '';
 let clearModalMousedownTarget = null;
+const userAvatarSvg = '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 20a7 7 0 1 0 0-14a7 7 0 0 0 0 14M33 8s2.25 4.5 0 10m7-14s4.5 8.1 0 18M4 40.8V42h30v-1.2c0-4.48 0-6.72-.872-8.432a8 8 0 0 0-3.496-3.496C27.92 28 25.68 28 21.2 28h-4.4c-4.48 0-6.72 0-8.432.872a8 8 0 0 0-3.496 3.496C4 34.08 4 36.32 4 40.8"/></svg>';
+const djAvatarSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M12 3.75c-3.241 0-5.756 2.03-6.185 4.5H8a.75.75 0 0 1 .75.75v7a.75.75 0 0 1-.75.75H5A2.75 2.75 0 0 1 2.25 14v-3a2.75 2.75 0 0 1 2.035-2.656C4.667 4.84 8.074 2.25 12 2.25s7.333 2.59 7.715 6.094A2.75 2.75 0 0 1 21.75 11v3a2.75 2.75 0 0 1-2.045 2.659A4.75 4.75 0 0 1 15 20.75h-1.145a2 2 0 1 1 0-1.5H15a3.25 3.25 0 0 0 3.163-2.5H16a.75.75 0 0 1-.75-.75V9a.75.75 0 0 1 .75-.75h2.185c-.429-2.47-2.944-4.5-6.185-4.5m-7 6c-.69 0-1.25.56-1.25 1.25v3c0 .69.56 1.25 1.25 1.25h2.25v-5.5zM20.25 11c0-.69-.56-1.25-1.25-1.25h-2.25v5.5H19c.69 0 1.25-.56 1.25-1.25z" clip-rule="evenodd"/></svg>';
+
+export function scrollChatToBottom() {
+  requestAnimationFrame(() => {
+    dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+  });
+}
 
 function closeClearChatModal() {
   dom.clearChatModal.classList.remove('open');
@@ -40,10 +48,10 @@ export function addChatMessage(text, type = 'ai', createdAt) {
   const inner = document.createElement('div');
   inner.className = 'bubble-content';
 
-  if (type === 'ai') {
+  if (type === 'ai' || type === 'user') {
     const avatar = document.createElement('div');
     avatar.className = 'bubble-avatar';
-    avatar.textContent = '♪';
+    avatar.innerHTML = type === 'ai' ? djAvatarSvg : userAvatarSvg;
     inner.appendChild(avatar);
   }
 
@@ -68,13 +76,13 @@ export function addChatMessage(text, type = 'ai', createdAt) {
   bubble.appendChild(meta);
 
   dom.chatMessages.appendChild(bubble);
-  dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+  scrollChatToBottom();
 }
 
 export function addLoadingMessage() {
   const bubble = document.createElement('div');
   bubble.className = 'chat-bubble ai loading';
-  bubble.innerHTML = '<div class="bubble-content"><div class="bubble-avatar">♪</div><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+  bubble.innerHTML = `<div class="bubble-content"><div class="bubble-avatar">${djAvatarSvg}</div><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
   dom.chatMessages.appendChild(bubble);
   dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
   return bubble;
@@ -105,7 +113,7 @@ export async function sendChat(text) {
     if (data.say) {
       addChatMessage(data.say, 'ai');
       if (data.segue) {
-        addChatMessage(`*${data.segue}*`, 'system');
+        addChatMessage(data.segue, 'segue');
       }
       if (data.mood) {
         state._currentScene = data.mood.detected || 'chat';
@@ -134,4 +142,8 @@ export function init() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && dom.clearChatModal.classList.contains('open')) closeClearChatModal();
   });
+  if (typeof ResizeObserver !== 'undefined') {
+    const observer = new ResizeObserver(scrollChatToBottom);
+    observer.observe(dom.chatPanel);
+  }
 }

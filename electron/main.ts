@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, ipcMain, session, globalShortcut, screen, utilityProcess } from 'electron';
+import { app, BrowserWindow, Menu, Tray, ipcMain, session, globalShortcut, screen, utilityProcess, shell } from 'electron';
 import type http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -73,8 +73,8 @@ function startNcmApi(port: number): void {
 
 async function createWindow(url: string): Promise<void> {
   window = new BrowserWindow({
-    width: 576,
-    height: 753,
+    width: 620,
+    height: 800,
     useContentSize: true,
     resizable: true,
     frame: false,
@@ -90,6 +90,12 @@ async function createWindow(url: string): Promise<void> {
   });
 
   window.once('ready-to-show', () => window?.show());
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https://github.com/')) {
+      void shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
   window.on('close', (event) => {
     if (quitting) return;
     event.preventDefault();

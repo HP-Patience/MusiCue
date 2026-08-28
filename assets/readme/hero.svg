@@ -13,18 +13,12 @@
   </g>
 
   <g transform="translate(64 94)">
-    <circle cx="14" cy="14" r="7" fill="#e76f51"/>
-    <text x="34" y="22" fill="#f5f0e8" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="68" font-weight="700" letter-spacing="-2">Claudio FM</text>
-    <text x="2" y="96" fill="#d4a373" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="26" font-weight="600">An LLM DJ that knows the room you are in.</text>
-    <text x="2" y="132" fill="#b7aaa0" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="20">Chat naturally. Get a considered queue, a voice intro, and playback.</text>
-  </g>
-
-  <g transform="translate(64 300)" fill="none" stroke-linecap="round">
-    <path d="M0 0V-22 M12 0V-42 M24 0V-12 M36 0V-58 M48 0V-30 M60 0V-48 M72 0V-18" stroke="#e76f51" stroke-width="6"/>
-    <path d="M96 -28H156 M184 -28H244 M272 -28H332" stroke="#d4a373" stroke-width="2"/>
-    <circle cx="168" cy="-28" r="4" fill="#1e9e78" stroke="none"/>
-    <circle cx="256" cy="-28" r="4" fill="#1e9e78" stroke="none"/>
-    <circle cx="344" cy="-28" r="4" fill="#1e9e78" stroke="none"/>
+    <text x="2" y="22" fill="#f5f0e8" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="68" font-weight="700" letter-spacing="-2">Claudio FM</text>
+    <g transform="translate(376 -32)" fill="none" stroke="#e76f51" stroke-width="5" stroke-linecap="round">
+      <path d="M0 34V48 M10 24V48 M20 14V48 M30 28V48 M40 20V48 M50 32V48"/>
+    </g>
+    <text x="2" y="96" fill="#d4a373" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="26" font-weight="600">A music player that understands what you mean.</text>
+    <text x="2" y="132" fill="#b7aaa0" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="20">Speak naturally. Get the right search, queue, and playback.</text>
   </g>
 
   <g transform="translate(742 86)">
@@ -32,20 +26,14 @@
     <rect x="1" y="1" width="392" height="34" rx="11" fill="#2b231d"/>
     <circle cx="22" cy="18" r="5" fill="#1e9e78"/>
     <text x="38" y="24" fill="#f5f0e8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">claudio / local session</text>
-    <text x="24" y="68" fill="#e76f51" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">&gt; play something for a rainy night</text>
+    <text x="24" y="68" fill="#e76f51" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">&gt; play something calm for a rainy night</text>
     <path d="M24 88H364" stroke="#3b3028"/>
     <circle cx="30" cy="116" r="5" fill="#d4a373"/>
-    <text x="46" y="122" fill="#d4a373" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">CONTEXT</text>
-    <text x="142" y="122" fill="#b7aaa0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">weather + taste + time</text>
+    <text x="46" y="122" fill="#d4a373" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">INTENT</text>
+    <text x="142" y="122" fill="#b7aaa0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">mood + scene + taste</text>
     <circle cx="30" cy="145" r="5" fill="#1e9e78"/>
-    <text x="46" y="151" fill="#1e9e78" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">OUTPUT</text>
-    <text x="142" y="151" fill="#b7aaa0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">queue + say + play</text>
+    <text x="46" y="151" fill="#1e9e78" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">ACTION</text>
+    <text x="142" y="151" fill="#b7aaa0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">search + queue + play</text>
   </g>
 
-  <g fill="#f5f0e8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15">
-    <text x="742" y="278">LLM</text>
-    <text x="840" y="278" fill="#d4a373">NETEASE</text>
-    <text x="956" y="278" fill="#e76f51">TTS</text>
-    <text x="1016" y="278" fill="#1e9e78">UPNP</text>
-  </g>
 </svg>

@@ -303,11 +303,11 @@ describe('integration: JSON contract (architecture spec)', () => {
     expect(parsed.error).toBeUndefined();
   });
 
-  it('malformed output falls back to plain text', () => {
+  it('marks malformed output as invalid instead of treating it as a successful response', () => {
     const parsed = parseOutput('claude returned text not json');
 
-    expect(parsed.error).toBeUndefined();
-    expect(parsed.say).toBe('claude returned text not json');
+    expect(parsed.error).toBe(true);
+    expect(parsed.say).toBe('');
     expect(parsed.play).toEqual([]);
   });
 

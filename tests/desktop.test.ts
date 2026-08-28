@@ -43,8 +43,8 @@ describe('desktop ports', () => {
     const main = fs.readFileSync(new URL('../electron/main.ts', import.meta.url), 'utf8');
     const preload = fs.readFileSync(new URL('../electron/preload.cjs', import.meta.url), 'utf8');
 
-    expect(main).toContain('width: 576');
-    expect(main).toContain('height: 753');
+    expect(main).toContain('width: 620');
+    expect(main).toContain('height: 800');
     expect(main).toContain('resizable: true');
     expect(main).toContain('useContentSize: true');
     expect(main).toContain('frame: false');
@@ -55,6 +55,8 @@ describe('desktop ports', () => {
     expect(main).toContain("ipcMain.handle('window:minimize'");
     expect(main).toContain("ipcMain.handle('window:pin'");
     expect(main).toContain("ipcMain.handle('window:close'");
+    expect(main).toContain('setWindowOpenHandler');
+    expect(main).toContain('shell.openExternal(url)');
     expect(main).toContain("ipcMain.handle('window:quit'");
     expect(main).toContain("clearStorageData({ storages: ['serviceworkers', 'cachestorage'] })");
     expect(main).not.toContain('minWidth:');
@@ -97,5 +99,14 @@ describe('desktop ports', () => {
     expect(pkg.build.afterPack).toBe('electron/after-pack.cjs');
     expect(afterPack).toContain("path.join(context.packager.projectDir, 'api-enhanced')");
     expect(afterPack).toContain('fs.cpSync(source, destination');
+  });
+
+  it('uses the simple note artwork for the Windows application icon', () => {
+    const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    const icon = fs.readFileSync(new URL('../frontend/icons/app-icon.svg', import.meta.url), 'utf8');
+
+    expect(pkg.build.win.icon).toBe('frontend/icons/app-icon.png');
+    expect(icon).toContain('viewBox="0 0 16 16"');
+    expect(icon).toContain('fill="#d4a373"');
   });
 });

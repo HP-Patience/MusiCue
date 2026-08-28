@@ -1,6 +1,7 @@
 // Claudio FM — 歌词解析与同步
 import { state } from './state.js';
 import { dom } from './dom.js';
+import { scrollChatToBottom } from './chat.js';
 
 export function parseLRC(lrcText) {
   if (!lrcText || !lrcText.trim()) return [];
@@ -46,9 +47,12 @@ export function updateLyrics(currentTime) {
 }
 
 export function init() {
+  dom.lyricsContainer.style.display = state.lyricsVisible ? '' : 'none';
+  dom.lyricToggleBtn.classList.toggle('active', state.lyricsVisible);
   dom.lyricToggleBtn.addEventListener('click', () => {
     state.lyricsVisible = !state.lyricsVisible;
     dom.lyricsContainer.style.display = state.lyricsVisible ? '' : 'none';
     dom.lyricToggleBtn.classList.toggle('active', state.lyricsVisible);
+    scrollChatToBottom();
   });
 }

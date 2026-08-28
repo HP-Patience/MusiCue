@@ -20,7 +20,7 @@ export const state = {
   _playlistShuffleHistory: [],
   currentLyrics: [],
   currentLyricIndex: -1,
-  lyricsVisible: true,
+  lyricsVisible: false,
   _playlists: [],
 };
 

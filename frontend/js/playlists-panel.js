@@ -1,7 +1,7 @@
 // Claudio FM — 歌单面板
 import { state } from './state.js';
 import { dom } from './dom.js';
-import { playTrack, setQueue, showModeToast, enterPlaylistMode, exitPlaylistMode } from './audio-core.js';
+import { playTrack, setQueue, showModeToast, enterPlaylistMode, exitPlaylistMode, removePlaylistTrack } from './audio-core.js';
 
 export async function renderPlaylistsPanel() {
   state._playlists = [];
@@ -177,7 +177,7 @@ async function showPlaylistDetail(pid) {
           });
           const item = await r.json();
           if (!item.url) { showModeToast('无法获取播放链接'); return; }
-          if (state.isPlaylistMode) exitPlaylistMode({ silent: true });
+          if (state.isPlaylistMode) exitPlaylistMode({ silent: true, preserveCurrent: false });
           state.queue.unshift(item);
           setQueue(state.queue);
           playTrack(item);
@@ -200,6 +200,7 @@ async function showPlaylistDetail(pid) {
           });
           if (!r.ok) { showModeToast('删除失败'); return; }
           showModeToast('已删除');
+          if (state.isPlaylistMode && state.playlistModeMeta?.id === pid) removePlaylistTrack(t.id);
           el.remove();
           const hMeta = dom.playlistsPanel.querySelector('.playlist-detail-meta');
           if (hMeta) {

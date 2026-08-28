@@ -6,11 +6,9 @@
   <img src="./assets/readme/hero.svg" width="100%" alt="Claudio FM, a local-first AI radio that turns natural language into music, DJ voice, and device actions">
 </p>
 
-
-
 <p align="center">
-  <strong>For people who want music to fit the moment, Claudio FM turns a natural-language request into a considered queue with a spoken DJ intro.</strong><br>
-  It collects your taste, routine, weather, calendar, time, and playback history, then routes the result to NetEase Cloud Music, TTS, and optional UPnP speakers.
+  <strong>Say what you feel. Cue the right music.</strong><br>
+  Its LLM understands open-ended requests, mood, time, weather, and listening context, then builds a queue that can follow a gradual emotional arc.
 </p>
 
 <p align="center">
@@ -20,24 +18,84 @@
   <a href="https://github.com/HP-Patience/Claudio/commits/master"><img src="https://img.shields.io/github/last-commit/HP-Patience/Claudio?style=flat-square" alt="Last commit"></a>
   <a href="https://github.com/HP-Patience/Claudio/issues"><img src="https://img.shields.io/github/issues/HP-Patience/Claudio?style=flat-square" alt="Open issues"></a>
 </p>
+## From Request to Playback
 
-## See It
+Ask for a precise song, describe a scene, or simply say how you feel. Claudio turns the request into music search queries, finds matching tracks, responds as your personal DJ, and starts playback in the same interface.
 
 <p align="center">
-  <img src="./assets/readme/player-preview-cropped.png" width="100%" alt="Claudio FM player interface with clock, playback controls, chat, and connection status">
+  <img src="./assets/readme/dj-request-demo.gif" width="620" alt="Typing a song request in Claudio and watching the DJ build and start the playback queue">
 </p>
+## Modes & Memory
 
-Claudio is designed as a quiet local player: the interface shows the current track, queue, chat, connection state, and controls in one surface.
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/player-light.png" width="100%" alt="Claudio FM light theme playing a song with lyrics and chat history">
+      <strong>Light player</strong><br>
+      A focused playback surface with lyrics, controls, and the live conversation.
+    </td>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/player-dark.png" width="100%" alt="Claudio FM dark theme playing a song with lyrics and chat history">
+      <strong>Dark player</strong><br>
+      The same local-first workflow in the project's dark listening mode.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/queue-view.png" width="100%" alt="Claudio FM queue view with upcoming tracks and direct playback controls">
+      <strong>Queue</strong><br>
+      Inspect upcoming tracks, start one immediately, or remove it from the queue.
+    </td>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/favorites-view.png" width="100%" alt="Claudio FM favorites view with saved songs and artists">
+      <strong>Favorites</strong><br>
+      Keep saved tracks close and send them back into playback when needed.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/playlists-view.png" width="100%" alt="Claudio FM playlist library with personal and imported playlists">
+      <strong>Playlist library</strong><br>
+      Browse personal playlists and create a new collection from the same interface.
+    </td>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/playlist-detail.png" width="100%" alt="Claudio FM playlist detail view with album art and track controls">
+      <strong>Playlist detail</strong><br>
+      Open a collection, inspect its tracks, and play the whole list or one song.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/stats-report.png" width="100%" alt="Claudio FM stats view with a generated monthly listening report">
+      <strong>Listening report</strong><br>
+      Review listening patterns and generate an LLM report from local history.
+    </td>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/history-view.png" width="100%" alt="Claudio FM listening history view with recently played tracks">
+      <strong>History</strong><br>
+      Revisit the tracks that shaped the recent listening context.
+    </td>
+  </tr>
+</table>
+## Progress & Roadmap
+
+- [x] **Natural-language playback** — Convert conversational requests into search queries, find matching tracks, build a queue, and start playback.
+- [x] **Context-aware selection** — Add time, weather, calendar, routines, and personal taste to the LLM context before choosing music.
+- [x] **Mood-aware listening arcs** — Guide mood-oriented requests through a gradual emotional progression instead of jumping to an abrupt opposite mood.
+- [x] **Listening statistics** — Aggregate plays by week, month, quarter, or year, including top artists, top songs, listening hours, and new discoveries.
+- [x] **LLM listening reports** — Turn a selected period's statistics into a short report about habits, taste changes, and possible listening directions.
+- [ ] **Persistent taste memory** — Extract durable taste signals from each generated report, save them as listening memory, and inject that memory into future LLM prompts so recommendations improve over time.
 
 ## How It Works
 
 <p align="center">
-  <img src="./assets/readme/workflow.svg" width="100%" alt="Claudio workflow from local context collection to structured LLM decisions and music, voice, and device execution">
+  <img src="./assets/readme/workflow.svg" width="100%" alt="MusiCue workflow from conversational intent and context to music playback and listening taste reports">
 </p>
 
-1. **Collect context** from `user/` plus weather, calendar, time, and playback history.
-2. **Ask the LLM** to interpret the request and return structured actions such as `say`, `play`, `reason`, and `segue`.
-3. **Execute the route** through NetEase Cloud Music, Fish Audio TTS, WebSocket updates, and optional UPnP devices.
+1. **Understand the request** instead of requiring an exact song title. The LLM converts conversational intent into structured actions and music search queries.
+2. **Collect context** from `user/` plus weather, calendar, time, recent conversation, and mood guidance.
+3. **Find and play music** through NetEase Cloud Music, then stream queue, playback, and optional TTS updates to the interface.
+4. **Learn from listening history** by aggregating a selected period and asking the LLM to explain the listener's habits and taste. Persistent prompt memory from these reports is the next planned step.
 
 The server keeps the orchestration in one auditable path. Simple transport commands such as `next`, `pause`, and `resume` can be handled locally; open-ended requests go through the configured OpenAI-compatible LLM endpoint.
 
@@ -74,12 +132,15 @@ Open [http://localhost:3005](http://localhost:3005). On Windows, `start-claudio.
 
 ## Capabilities
 
-- Natural-language music requests with context-aware selection.
+- Conversational music requests without requiring an exact song title.
+- Automatic conversion from intent to music search queries and playback.
+- Mood-aware, gradual listening arcs for emotional requests.
 - DJ voice announcements through Fish Audio TTS.
 - Normal, SMART, and NetEase Private FM playback modes.
 - Local user corpus for taste, routines, mood rules, and playlists.
 - Weather and Feishu calendar context for scene suggestions.
-- Queue, favorites, hidden songs, history, playlists, and playback statistics.
+- Queue, favorites, hidden songs, history, and playlists.
+- Weekly, monthly, quarterly, and yearly listening statistics with LLM-generated reports.
 - Optional UPnP control for compatible speakers and devices.
 - PWA shell and Electron desktop packaging for Windows.
 

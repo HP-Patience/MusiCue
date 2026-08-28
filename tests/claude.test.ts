@@ -31,9 +31,15 @@ describe('parseOutput', () => {
     expect(result.play).toEqual([]);
   });
 
-  it('plain text fallback: uses text as say', () => {
+  it('rejects plain text responses that violate the JSON contract', () => {
     const result = parseOutput('来一首爵士乐放松一下');
-    expect(result.say).toBe('来一首爵士乐放松一下');
+    expect(result.error).toBe(true);
+    expect(result.play).toEqual([]);
+  });
+
+  it('rejects JSON responses without a valid play array', () => {
+    const result = parseOutput(JSON.stringify({ say: '播放好了' }));
+    expect(result.error).toBe(true);
     expect(result.play).toEqual([]);
   });
 

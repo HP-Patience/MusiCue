@@ -32,7 +32,7 @@ describe('playlist internal playback mode', () => {
 
     expect(css).toContain('.playlist-mode-btn');
     expect(css).toContain('.playlist-mode-btn.active');
-    expect(wsSource).toContain('exitPlaylistMode({ silent: true })');
+    expect(wsSource).toContain('exitPlaylistMode({ silent: true, preserveCurrent: false })');
   });
 
   it('keeps playlist cards at full height so the panel can scroll', () => {
@@ -60,5 +60,18 @@ describe('playlist internal playback mode', () => {
     expect(modeSource).toContain('setPlayMode(modes[(current + 1) % modes.length])');
     expect(audioSource).toContain("list: ICONS.repeat, single: ICONS.single");
     expect(audioSource).toContain("list: '列表循环', single: '单曲循环', shuffle: '随机播放'");
+  });
+
+  it('invalidates stale playlist navigation and synchronizes external playback', () => {
+    const audioSource = fs.readFileSync(path.resolve('frontend/js/audio-core.js'), 'utf-8');
+    const queueSource = fs.readFileSync(path.resolve('frontend/js/queue-panel.js'), 'utf-8');
+    const playlistSource = fs.readFileSync(path.resolve('frontend/js/playlists-panel.js'), 'utf-8');
+
+    expect(audioSource).toContain('playlistModeGeneration');
+    expect(audioSource).toContain('generation !== playlistModeGeneration');
+    expect(audioSource).toContain('export function removePlaylistTrack');
+    expect(audioSource).toContain('fromPlaylist = false');
+    expect(queueSource).toContain("exitPlaylistMode({ silent: true, preserveCurrent: false })");
+    expect(playlistSource).toContain('removePlaylistTrack(t.id)');
   });
 });

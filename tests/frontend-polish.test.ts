@@ -57,8 +57,9 @@ describe('frontend polish', () => {
     expect(source).toContain('audio.play()');
     expect(source).toContain('.then(() => {');
     expect(source).toContain('recordPlayback(item)');
-    const playTrackSource = source.slice(source.indexOf('export function playTrack(item)'), source.indexOf('function updateMediaSession(item)'));
-    const helperSource = source.slice(source.indexOf('function recordConfirmedPlayback(item, token, expectedUrl)'), source.indexOf('export function playTrack(item)'));
+    const playTrackStart = source.indexOf('export function playTrack(item,');
+    const playTrackSource = source.slice(playTrackStart, source.indexOf('function updateMediaSession(item)'));
+    const helperSource = source.slice(source.indexOf('function recordConfirmedPlayback(item, token, expectedUrl)'), playTrackStart);
     expect(playTrackSource).toContain('const audioUrl = resolveAudioUrl(item.url)');
     expect(playTrackSource).toContain('audio.src = audioUrl');
     expect(playTrackSource).toContain('recordConfirmedPlayback(item, token, audio.src)');
@@ -133,8 +134,11 @@ describe('frontend polish', () => {
     expect(fs.existsSync(path.resolve('frontend/icons/icon-512.png'))).toBe(true);
     expect(fs.existsSync(path.resolve('frontend/icons/tray-icon.png'))).toBe(true);
     expect(fs.existsSync(path.resolve('frontend/icons/nav-logo.png'))).toBe(true);
-    expect(html).toContain('/icons/nav-logo.png');
+    expect(html).toContain('/icons/music-note.svg');
+    expect(html).toContain('href="/icons/music-note.svg"');
     expect(css).toContain('.nav-avatar img');
+    expect(css).toContain("background: var(--accent)");
+    expect(css).toContain("mask: url('/icons/music-note.svg')");
     expect(main).toContain("'tray-icon.png'");
   });
 
@@ -215,5 +219,63 @@ describe('frontend polish', () => {
     expect(chat).toContain('className = \'now-playing-icon\'');
     expect(audio).toContain("'now-playing'");
     expect(audio).not.toContain('🎵 Now playing:');
+  });
+
+  it('uses one scroll container for DJ replies and segue messages', () => {
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+
+    expect(css).toMatch(/\.chat-messages\s*\{[\s\S]*height:\s*100%;[\s\S]*max-height:\s*none;[\s\S]*overflow-y:\s*auto;/);
+    expect(css).toMatch(/\.chat-panel\s*\{\s*overflow:\s*hidden;\s*\}/);
+  });
+
+  it('recalculates chat scroll when lyrics change the layout height', () => {
+    const chat = fs.readFileSync(path.resolve('frontend/js/chat.js'), 'utf-8');
+    const lyrics = fs.readFileSync(path.resolve('frontend/js/lyrics.js'), 'utf-8');
+
+    expect(chat).toContain('new ResizeObserver(scrollChatToBottom)');
+    expect(lyrics).toContain('scrollChatToBottom();');
+  });
+
+  it('keeps lyrics closed on first launch', () => {
+    const state = fs.readFileSync(path.resolve('frontend/js/state.js'), 'utf-8');
+    const lyrics = fs.readFileSync(path.resolve('frontend/js/lyrics.js'), 'utf-8');
+
+    expect(state).toContain('lyricsVisible: false');
+    expect(lyrics).toContain("dom.lyricsContainer.style.display = state.lyricsVisible ? '' : 'none'");
+  });
+
+  it('places the GitHub link beside settings', () => {
+    const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
+
+    expect(html).toContain('class="nav-btn github-btn"');
+    expect(html).toContain('https://github.com/HP-Patience/Claudio');
+    expect(html).toContain('title="GitHub"');
+  });
+
+  it('keeps the NetEase icon while login state text changes', () => {
+    const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
+    const auth = fs.readFileSync(path.resolve('frontend/js/ncm-auth.js'), 'utf-8');
+
+    expect(html).toContain('id="ncm-login-label">LOGIN</span>');
+    expect(html).toContain('viewBox="0 0 24 24"');
+    expect(auth).toContain("document.getElementById('ncm-login-label')");
+    expect(auth).not.toContain('dom.ncmLoginBtn.textContent');
+  });
+
+  it('uses the paper-plane SVG for chat send', () => {
+    const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
+
+    expect(html).toContain('id="send-btn"');
+    expect(html).toContain('M9.912 12H4L2.023 4.135');
+    expect(html).not.toContain('id="send-btn">↑</button>');
+  });
+
+  it('renders segue text as italic UI instead of exposing markdown markers', () => {
+    const chat = fs.readFileSync(path.resolve('frontend/js/chat.js'), 'utf-8');
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+
+    expect(chat).toContain("addChatMessage(data.segue, 'segue')");
+    expect(chat).not.toContain('`*${data.segue}*`');
+    expect(css).toContain('.chat-bubble.segue .bubble-text');
   });
 });
