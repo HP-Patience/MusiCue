@@ -12,11 +12,11 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/HP-Patience/Claudio/stargazers"><img src="https://img.shields.io/github/stars/HP-Patience/Claudio?style=flat-square&label=stars" alt="GitHub stars"></a>
-  <a href="https://github.com/HP-Patience/Claudio/network/members"><img src="https://img.shields.io/github/forks/HP-Patience/Claudio?style=flat-square&label=forks" alt="GitHub forks"></a>
-  <a href="https://github.com/HP-Patience/Claudio"><img src="https://img.shields.io/github/languages/top/HP-Patience/Claudio?style=flat-square" alt="Top language"></a>
-  <a href="https://github.com/HP-Patience/Claudio/commits/master"><img src="https://img.shields.io/github/last-commit/HP-Patience/Claudio?style=flat-square" alt="Last commit"></a>
-  <a href="https://github.com/HP-Patience/Claudio/issues"><img src="https://img.shields.io/github/issues/HP-Patience/Claudio?style=flat-square" alt="Open issues"></a>
+  <a href="https://github.com/HP-Patience/MusiCue/stargazers"><img src="https://img.shields.io/github/stars/HP-Patience/MusiCue?style=flat-square&label=stars" alt="GitHub stars"></a>
+  <a href="https://github.com/HP-Patience/MusiCue/network/members"><img src="https://img.shields.io/github/forks/HP-Patience/MusiCue?style=flat-square&label=forks" alt="GitHub forks"></a>
+  <a href="https://github.com/HP-Patience/MusiCue"><img src="https://img.shields.io/github/languages/top/HP-Patience/MusiCue?style=flat-square" alt="Top language"></a>
+  <a href="https://github.com/HP-Patience/MusiCue/commits/master"><img src="https://img.shields.io/github/last-commit/HP-Patience/MusiCue?style=flat-square" alt="Last commit"></a>
+  <a href="https://github.com/HP-Patience/MusiCue/issues"><img src="https://img.shields.io/github/issues/HP-Patience/MusiCue?style=flat-square" alt="Open issues"></a>
 </p>
 ## From Request to Playback
 

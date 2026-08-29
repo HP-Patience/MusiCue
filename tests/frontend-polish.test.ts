@@ -287,7 +287,7 @@ describe('frontend polish', () => {
     const html = fs.readFileSync(path.resolve('frontend/index.html'), 'utf-8');
 
     expect(html).toContain('class="nav-btn github-btn"');
-    expect(html).toContain('https://github.com/HP-Patience/Claudio');
+    expect(html).toContain('https://github.com/HP-Patience/MusiCue');
     expect(html).toContain('title="GitHub"');
   });
 
