@@ -18,6 +18,7 @@
   <a href="https://github.com/HP-Patience/MusiCue/commits/master"><img src="https://img.shields.io/github/last-commit/HP-Patience/MusiCue?style=flat-square" alt="Last commit"></a>
   <a href="https://github.com/HP-Patience/MusiCue/issues"><img src="https://img.shields.io/github/issues/HP-Patience/MusiCue?style=flat-square" alt="Open issues"></a>
 </p>
+
 ## From Request to Playback
 
 Ask for a precise song, describe a scene, or simply say how you feel. Claudio turns the request into music search queries, finds matching tracks, responds as your personal DJ, and starts playback in the same interface.
@@ -25,6 +26,7 @@ Ask for a precise song, describe a scene, or simply say how you feel. Claudio tu
 <p align="center">
   <img src="./assets/readme/dj-request-demo.gif" width="620" alt="Typing a song request in Claudio and watching the DJ build and start the playback queue">
 </p>
+
 ## Modes & Memory
 
 <table>
@@ -77,6 +79,7 @@ Ask for a precise song, describe a scene, or simply say how you feel. Claudio tu
     </td>
   </tr>
 </table>
+
 ## Progress & Roadmap
 
 - [x] **Natural-language playback** — Convert conversational requests into search queries, find matching tracks, build a queue, and start playback.
