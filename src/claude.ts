@@ -21,6 +21,10 @@ export interface ClaudeUsage {
   context_window: number;
 }
 
+export function decodeUtf8Chunks(chunks: Buffer[]): string {
+  return Buffer.concat(chunks).toString('utf8');
+}
+
 export function parseOutput(raw: string): ClaudeOutput {
   // Try to find and parse JSON in the response
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
@@ -51,13 +55,14 @@ export function parseOutput(raw: string): ClaudeOutput {
 interface InvokeOptions {
   timeout?: number;
   db?: Database.Database;
+  responseFormat?: 'json' | 'text';
 }
 
 export async function invokeClaude(
   prompt: string,
   options: InvokeOptions = {},
 ): Promise<ClaudeOutput & { usage?: ClaudeUsage }> {
-  const { timeout = 120000, db } = options;
+  const { timeout = 120000, db, responseFormat = 'json' } = options;
 
   const apiKey = db ? getPref(db, 'api_key') || process.env['ANTHROPIC_API_KEY'] || '' : process.env['ANTHROPIC_API_KEY'] || '';
   const baseUrl = (db ? getPref(db, 'api_base_url') || '' : '') || process.env['ANTHROPIC_BASE_URL'] || 'https://api.anthropic.com';
@@ -126,9 +131,10 @@ export async function invokeClaude(
           },
           timeout,
         }, (res) => {
-          let data = '';
-          res.on('data', (chunk) => data += chunk);
+          const chunks: Buffer[] = [];
+          res.on('data', (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
           res.on('end', () => {
+            const data = decodeUtf8Chunks(chunks);
             if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
               try {
                 const parsed = JSON.parse(data);
@@ -153,7 +159,9 @@ export async function invokeClaude(
       usage = result.usage;
     }
 
-    const output = parseOutput(text);
+    const output = responseFormat === 'text'
+      ? { say: text, play: [], reason: '', segue: '' }
+      : parseOutput(text);
     return { ...output, usage };
   } catch (err) {
     clearTimeout(timer);

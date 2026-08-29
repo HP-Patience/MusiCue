@@ -1,5 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { invokeClaude, parseOutput } from '../src/claude.js';
+import { decodeUtf8Chunks, invokeClaude, parseOutput } from '../src/claude.js';
+
+describe('decodeUtf8Chunks', () => {
+  it('preserves Chinese characters split across network chunks', () => {
+    const encoded = Buffer.from('你开始走出熟悉圈层', 'utf8');
+    const splitAt = encoded.indexOf(Buffer.from('走')) + 1;
+
+    expect(decodeUtf8Chunks([encoded.subarray(0, splitAt), encoded.subarray(splitAt)])).toBe('你开始走出熟悉圈层');
+  });
+});
 
 describe('parseOutput', () => {
   it('parses valid JSON with all fields', () => {
@@ -94,6 +103,17 @@ describe('invokeClaude', () => {
     expect(result.say).toBe('Hi');
     expect(result.play).toEqual(['123']);
     expect(result.usage).toEqual({ input_tokens: 10, output_tokens: 5, context_window: 200000 });
+  });
+
+  it('preserves plain text for non-JSON LLM tasks', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify({
+      content: [{ type: 'text', text: '本月听歌报告正文' }],
+    }), { status: 200 }));
+
+    const result = await invokeClaude('report prompt', { responseFormat: 'text' });
+
+    expect(result.say).toBe('本月听歌报告正文');
+    expect(result.error).toBeUndefined();
   });
 
   it('removes a trailing /v1 before appending the Anthropic endpoint', async () => {

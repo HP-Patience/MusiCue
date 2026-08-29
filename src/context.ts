@@ -48,7 +48,7 @@ export function assemblePrompt(options: PromptOptions): string {
 
   return [
     '=== DJ Persona ===',
-    'You are Claudio, a personal AI radio DJ.',
+    'You are MusiCue, a personal AI radio DJ.',
     '',
     '=== User Taste ===',
     corpus.taste,

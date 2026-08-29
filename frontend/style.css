@@ -531,7 +531,11 @@ body {
 .lyrics-container {
   text-align: center;
   padding: 10px 24px 6px;
-  min-height: 62px;
+  height: 76px;
+  min-height: 76px;
+  max-height: 76px;
+  flex: 0 0 76px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -540,7 +544,7 @@ body {
   transition: opacity .3s;
 }
 .lyrics-container.empty {
-  display: none;
+  visibility: hidden;
 }
 .lyric-line {
   transition: opacity .25s, font-size .25s, color .25s;
@@ -630,19 +634,15 @@ body {
 
 /* ── Panels ── */
 .panel {
-  height: 320px;
-  max-height: 320px;
+  flex: 1 1 auto;
+  height: auto;
+  max-height: none;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
   scroll-behavior: smooth;
-}
-@media (max-height: 720px) {
-  .panel {
-    height: 260px;
-    max-height: 260px;
-  }
 }
 .panel::-webkit-scrollbar { width: 3px; }
 .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -658,6 +658,7 @@ body {
   padding: 10px 12px;
   border-radius: var(--radius-sm);
   transition: background .15s;
+  flex-shrink: 0;
 }
 .track-item:hover { background: var(--bg-hover); }
 .track-item.current { background: color-mix(in srgb, var(--accent) 8%, transparent); }
@@ -1050,8 +1051,14 @@ select.form-input { appearance: auto; cursor: pointer; }
 
 /* ── Toast ── */
 .toast-container {
-  position: fixed; inset: 0;
-  z-index: 9998; display: flex; justify-content: center; align-items: center;
+  position: fixed;
+  top: 76px;
+  right: 18px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
   pointer-events: none;
 }
 .toast-card {
@@ -1060,7 +1067,8 @@ select.form-input { appearance: auto; cursor: pointer; }
   box-shadow: 0 8px 40px rgba(0,0,0,0.5);
   animation: toast-in .25s ease-out;
   display: flex; flex-direction: column; gap: 10px;
-  pointer-events: auto; max-width: 360px;
+  width: min(260px, calc(100vw - 36px));
+  pointer-events: auto;
 }
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(-12px) scale(.96); }

@@ -198,7 +198,8 @@ export async function generateReport(db: Database.Database, period?: string, ran
 直接输出报告文案，不要 JSON。`;
 
   try {
-    const result = await invokeClaude(prompt, { db, timeout: 30000 });
+    const result = await invokeClaude(prompt, { db, timeout: 30000, responseFormat: 'text' });
+    if (result.say.includes('\uFFFD')) throw new Error('LLM response contains invalid UTF-8');
     setPlayStats(db, window.period, JSON.stringify(stat), result.say);
     return { period: window.period, range: window.range, stat, insight: result.say };
   } catch {

@@ -94,7 +94,7 @@ export async function renderStatsPanel() {
     const btn = document.createElement('button');
     btn.className = 'stats-gen-btn';
     btn.textContent = `生成${getRangeLabel(selectedRange)}报告`;
-    btn.addEventListener('click', async () => {
+    const generateSelectedReport = async () => {
       btn.textContent = '生成中…';
       btn.disabled = true;
       try {
@@ -103,13 +103,17 @@ export async function renderStatsPanel() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ range: selectedRange }),
         });
+        if (!r.ok) throw new Error('生成失败');
         const d = await r.json();
         renderReportContent(d);
-      } catch { /* ignore */ } finally {
+      } catch {
+        renderEmpty();
+      } finally {
         btn.textContent = `生成${getRangeLabel(selectedRange)}报告`;
         btn.disabled = false;
       }
-    });
+    };
+    btn.addEventListener('click', generateSelectedReport);
     dom.statsPanel.appendChild(btn);
 
     sel.addEventListener('change', async () => {

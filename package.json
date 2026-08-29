@@ -31,7 +31,7 @@
   },
   "build": {
     "appId": "ai.claudio.desktop",
-    "productName": "Claudio",
+    "productName": "MusiCue",
     "afterPack": "electron/after-pack.cjs",
     "directories": {
       "output": "release"

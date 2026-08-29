@@ -171,6 +171,13 @@ export function exitPlaylistMode({ silent, preserveCurrent = true } = {}) {
   if (!silent) showModeToast('已退出歌单模式');
 }
 
+export function playNowInQueue(item) {
+  state.queue = state.queue.filter(existing => String(existing.songId) !== String(item.songId));
+  state.queue.unshift(item);
+  setQueue(state.queue);
+  return playTrack(item);
+}
+
 export function removePlaylistTrack(songId) {
   playlistModeGeneration++;
   state.playlistQueue = state.playlistQueue.filter(item => Number(item.songId) !== Number(songId));
@@ -270,10 +277,14 @@ export function playTrack(item, { fromPlaylist = false } = {}) {
   state.currentLyrics = [];
   state.currentLyricIndex = -1;
   dom.lyricsContainer.classList.add('empty');
+  dom.lyricPrev.textContent = '';
+  dom.lyricCurr.textContent = '';
+  dom.lyricNext.textContent = '';
   if (item.songId) {
     fetch(`/api/lyric?songId=${item.songId}`)
       .then(r => r.json())
       .then(data => {
+        if (token !== playRequestToken || state.currentTrack !== item) return;
         state.currentLyrics = parseLRC(data.lyric);
         state.currentLyricIndex = -1;
         updateLyrics(audio.currentTime);
@@ -288,9 +299,9 @@ export function playTrack(item, { fromPlaylist = false } = {}) {
 function updateMediaSession(item) {
   if (!('mediaSession' in navigator)) return;
   navigator.mediaSession.metadata = new MediaMetadata({
-    title: item.name || 'Claudio',
-    artist: item.artist || 'Claudio FM',
-    album: 'Claudio FM',
+    title: item.name || 'MusiCue',
+    artist: item.artist || 'MusiCue',
+    album: 'MusiCue',
   });
   navigator.mediaSession.setActionHandler('play', () => audio.play().catch(() => {}));
   navigator.mediaSession.setActionHandler('pause', () => audio.pause());

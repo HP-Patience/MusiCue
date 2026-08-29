@@ -2,7 +2,7 @@
 import { state } from './state.js';
 import { dom } from './dom.js';
 import { ICONS } from './icons.js';
-import { playTrack, setQueue } from './audio-core.js';
+import { playNowInQueue } from './audio-core.js';
 
 export async function loadFavorites() {
   try {
@@ -64,9 +64,7 @@ export async function renderFavsPanel() {
             chatModule.addChatMessage(`无法获取 ${item.name} 的播放链接`, 'system');
             return;
           }
-          state.queue.unshift(item);
-          setQueue(state.queue);
-          playTrack(item);
+          playNowInQueue(item);
         } catch (err) {
           const chatModule = await import('./chat.js');
           chatModule.addChatMessage(`播放失败: ${err.message}`, 'system');

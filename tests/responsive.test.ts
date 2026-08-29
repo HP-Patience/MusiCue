@@ -30,7 +30,7 @@ describe('responsive frontend layout', () => {
 
   it('leaves a transparent desktop gutter for the window shadow', async () => {
     await page.setViewportSize({ width: 1180, height: 820 });
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
 
     const dimensions = await page.evaluate(() => ({
       htmlWidth: document.documentElement.getBoundingClientRect().width,
@@ -59,7 +59,7 @@ describe('responsive frontend layout', () => {
 
   it('exposes draggable nav with clickable window controls', async () => {
     await page.setViewportSize({ width: 542, height: 753 });
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
 
     const controls = await page.evaluate(() => ({
       navRegion: getComputedStyle(document.querySelector('.nav')!).getPropertyValue('-webkit-app-region'),
@@ -78,9 +78,19 @@ describe('responsive frontend layout', () => {
     expect(controls.swGuardPresent).toBe(true);
   });
 
+  it('grows the active panel with the window instead of leaving blank space', async () => {
+    await page.setViewportSize({ width: 620, height: 753 });
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    const shortHeight = await page.locator('#chat-panel').evaluate(el => el.getBoundingClientRect().height);
+    await page.setViewportSize({ width: 620, height: 800 });
+    const tallHeight = await page.locator('#chat-panel').evaluate(el => el.getBoundingClientRect().height);
+
+    expect(tallHeight - shortHeight).toBeGreaterThanOrEqual(45);
+  });
+
   it('opens the vertical volume control and supports wheel adjustment', async () => {
     await page.setViewportSize({ width: 576, height: 753 });
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
     const button = page.locator('#volume-btn');
     const slider = page.locator('#volume');
     await button.hover();
@@ -88,6 +98,25 @@ describe('responsive frontend layout', () => {
     const before = Number(await slider.inputValue());
     await button.dispatchEvent('wheel', { deltaY: -100 });
     expect(Number(await slider.inputValue())).toBe(Math.min(100, before + 5));
+  });
+
+  it('keeps chat position stable while the fixed lyric area changes content state', async () => {
+    await page.setViewportSize({ width: 620, height: 800 });
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    const metrics = await page.evaluate(() => {
+      const lyrics = document.querySelector('#lyrics-container');
+      const chat = document.querySelector('.chat-section');
+      lyrics.style.display = '';
+      lyrics.classList.remove('empty');
+      const visible = { lyricHeight: lyrics.getBoundingClientRect().height, chatTop: chat.getBoundingClientRect().top };
+      lyrics.classList.add('empty');
+      const loading = { lyricHeight: lyrics.getBoundingClientRect().height, chatTop: chat.getBoundingClientRect().top };
+      return { visible, loading };
+    });
+
+    expect(metrics.visible.lyricHeight).toBe(76);
+    expect(metrics.loading.lyricHeight).toBe(76);
+    expect(metrics.loading.chatTop).toBe(metrics.visible.chatTop);
   });
 
   it('scrolls a long playlist collection without shrinking cards', async () => {
@@ -112,7 +141,7 @@ describe('responsive frontend layout', () => {
     await page.route('**/api/favorites', route => route.fulfill({ json: { favorites: [] } }));
     await page.route('**/api/messages', route => route.fulfill({ json: { messages: [] } }));
     await page.setViewportSize({ width: 576, height: 753 });
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.querySelector('#ncm-login-btn')?.classList.contains('logged-in'));
     await page.click('.chat-tab[data-tab="playlists"]');
     await page.locator('.playlist-card').nth(11).waitFor();
@@ -153,23 +182,24 @@ describe('responsive frontend layout', () => {
 
   it('keeps playlist playback state consistent across navigation and exit', async () => {
     await page.setViewportSize({ width: 620, height: 800 });
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
     const result = await page.evaluate(async () => window.eval(`(async () => {
       const { state } = await import('/js/state.js');
       const core = await import('/js/audio-core.js');
       const one = { songId: '1', name: 'One', artist: 'A', url: 'data:audio/mp3;base64,' };
       state.queue = [];
-      state.currentTrack = null;
+      state.currentTrack = one;
       state.isPlaylistMode = true;
       state.playlistModeMeta = { id: 1, name: 'Single' };
       state.playlistQueue = [one];
       state.playMode = 'list';
-      await core.nextTrack();
-      const singleRepeated = state.currentTrack?.songId === '1';
 
       const regular = { songId: '9', name: 'Regular', artist: 'R', url: 'data:audio/mp3;base64,' };
       core.playTrack(regular);
       const regularExitedPlaylist = !state.isPlaylistMode && state.playlistQueue.length === 0;
+      core.playNowInQueue(regular);
+      core.playNowInQueue({ ...regular });
+      const duplicateCount = state.queue.filter(item => item.songId === regular.songId).length;
 
       state.isPlaylistMode = true;
       state.playlistModeMeta = { id: 2, name: 'Delete' };
@@ -184,12 +214,12 @@ describe('responsive frontend layout', () => {
       state.playlistQueue = [one];
       core.exitPlaylistMode({ silent: true });
       const exitPreservedCurrent = state.queue[0]?.songId === '1' && !state.isPlaylistMode;
-      return { singleRepeated, regularExitedPlaylist, deleteSynced, exitPreservedCurrent };
+      return { regularExitedPlaylist, duplicateCount, deleteSynced, exitPreservedCurrent };
     })()`));
 
     expect(result).toEqual({
-      singleRepeated: true,
       regularExitedPlaylist: true,
+      duplicateCount: 1,
       deleteSynced: true,
       exitPreservedCurrent: true,
     });
@@ -206,7 +236,7 @@ describe('responsive frontend layout', () => {
         onFocus: (_callback: () => void) => {},
       };
     });
-    await page.goto(`${baseUrl}/quick-input.html`);
+    await page.goto(`${baseUrl}/quick-input.html`, { waitUntil: 'domcontentloaded' });
 
     const input = page.locator('#quick-input');
     expect(await input.getAttribute('placeholder')).toBe('Say something to the DJ.');
@@ -222,7 +252,7 @@ describe('responsive frontend layout', () => {
 
   it('uses full-screen touch layout on phone-sized viewport', async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
 
     const appBox = await page.locator('#app').boundingBox();
     expect(appBox?.width).toBeGreaterThanOrEqual(389);

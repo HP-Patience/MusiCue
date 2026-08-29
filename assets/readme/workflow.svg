@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="470" viewBox="0 0 1200 470" role="img" aria-labelledby="title desc">
-  <title id="title">Claudio listening loop</title>
-  <desc id="desc">Claudio understands a conversational request, reads the listening context, finds and plays music, then turns listening history into taste insight.</desc>
+  <title id="title">MusiCue listening loop</title>
+  <desc id="desc">MusiCue understands a conversational request, reads the listening context, finds and plays music, then turns listening history into taste insight.</desc>
   <rect width="1200" height="470" rx="24" fill="#f5f0e8"/>
   <text x="56" y="62" fill="#191411" font-family="ui-sans-serif, Segoe UI, sans-serif" font-size="32" font-weight="700">Say it once. Let the music take shape.</text>
   <text x="56" y="94" fill="#76695f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">INTENT → CONTEXT → PLAYBACK → MEMORY</text>

@@ -36,7 +36,7 @@ beforeEach(async () => {
 });
 
 async function openLoginModal() {
-  await page.goto(baseUrl);
+  await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#ncm-login-btn');
   await page.click('#ncm-login-btn');
   await page.waitForSelector('#ncm-login-modal.open');
@@ -51,7 +51,7 @@ async function closeModalViaX() {
 
 describe('NCM Login UI', { timeout: 15000 }, () => {
   it('shows LOGIN button in nav', async () => {
-    await page.goto(baseUrl);
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#ncm-login-btn');
     const text = await page.textContent('#ncm-login-btn');
     expect(text).toBe('LOGIN');

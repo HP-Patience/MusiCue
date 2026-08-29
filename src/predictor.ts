@@ -65,7 +65,7 @@ export async function getSuggestedQueue(opts: {
     recentHistory: history,
   });
 
-  const prompt = `You are Claudio, a personal AI radio DJ.
+  const prompt = `You are MusiCue, a personal AI radio DJ.
 
 ${basePrompt}
 

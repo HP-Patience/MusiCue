@@ -90,17 +90,25 @@ describe('frontend polish', () => {
     expect(replaySource).not.toContain('audio.play().catch(() => {})');
   });
 
-  it('keeps tab panel height stable during async content swaps', () => {
+  it('lets tab panels fill the available height during async content swaps', () => {
     const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
 
-    expect(css).toMatch(/\.panel\s*\{[\s\S]*height:\s*320px;[\s\S]*max-height:\s*320px;/);
-    expect(css).toMatch(/@media \(max-height: 720px\)\s*\{[\s\S]*\.panel\s*\{[\s\S]*height:\s*260px;[\s\S]*max-height:\s*260px;/);
+    expect(css).toMatch(/\.panel\s*\{[\s\S]*flex:\s*1 1 auto;[\s\S]*height:\s*auto;[\s\S]*max-height:\s*none;/);
+    expect(css).not.toContain('height: 320px');
   });
 
   it('stats panel bypasses browser cache when reading reports', () => {
     const source = fs.readFileSync(path.resolve('frontend/js/stats-panel.js'), 'utf-8');
 
     expect(source).toContain("cache: 'no-store'");
+  });
+
+  it('keeps missing stats reports manual', () => {
+    const source = fs.readFileSync(path.resolve('frontend/js/stats-panel.js'), 'utf-8');
+
+    expect(source).toContain('const generateSelectedReport = async () =>');
+    expect(source).not.toContain('if (!data.insight) void generateSelectedReport()');
+    expect(source).toContain('if (!r.ok) throw new Error');
   });
 
   it('keeps window controls inline and disables progress hover resizing', () => {
@@ -242,6 +250,37 @@ describe('frontend polish', () => {
 
     expect(state).toContain('lyricsVisible: false');
     expect(lyrics).toContain("dom.lyricsContainer.style.display = state.lyricsVisible ? '' : 'none'");
+  });
+
+  it('reserves a fixed three-line lyric area while tracks switch', () => {
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+    const audio = fs.readFileSync(path.resolve('frontend/js/audio-core.js'), 'utf-8');
+
+    expect(css).toMatch(/\.lyrics-container\s*\{[\s\S]*height:\s*76px;[\s\S]*flex:\s*0 0 76px;/);
+    expect(css).toMatch(/\.lyrics-container\.empty\s*\{[\s\S]*visibility:\s*hidden;/);
+    expect(audio).toContain('token !== playRequestToken || state.currentTrack !== item');
+  });
+
+  it('deduplicates repeated history and favorite plays by song id', () => {
+    const audio = fs.readFileSync(path.resolve('frontend/js/audio-core.js'), 'utf-8');
+    const history = fs.readFileSync(path.resolve('frontend/js/history-panel.js'), 'utf-8');
+    const favorites = fs.readFileSync(path.resolve('frontend/js/favs-panel.js'), 'utf-8');
+
+    expect(audio).toContain('export function playNowInQueue(item)');
+    expect(audio).toContain('String(existing.songId) !== String(item.songId)');
+    expect(history).toContain('await playNowInQueue(playable)');
+    expect(favorites).toContain('playNowInQueue(item)');
+  });
+
+  it('lets panels fill available height and shows non-blocking suggestions at top right', () => {
+    const css = fs.readFileSync(path.resolve('frontend/style.css'), 'utf-8');
+    const toast = fs.readFileSync(path.resolve('frontend/js/toast.js'), 'utf-8');
+
+    expect(css).toMatch(/\.panel\s*\{[\s\S]*flex:\s*1 1 auto;[\s\S]*max-height:\s*none;/);
+    expect(css).not.toContain('height: 320px');
+    expect(css).toMatch(/\.track-item\s*\{[\s\S]*flex-shrink:\s*0;/);
+    expect(css).toMatch(/\.toast-container\s*\{[\s\S]*top:\s*76px;[\s\S]*right:\s*18px;/);
+    expect(toast).toContain('setTimeout(removeSuggestion, 15000)');
   });
 
   it('places the GitHub link beside settings', () => {

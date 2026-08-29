@@ -82,7 +82,7 @@ export async function init() {
 
   const hasHistory = await loadHistory();
   if (!hasHistory) {
-    chatModule.addChatMessage('你好！我是 Claudio，你的私人 AI 电台 DJ。想听什么？', 'ai');
+    chatModule.addChatMessage('你好！我是 MusiCue，你的私人 AI 电台 DJ。想听什么？', 'ai');
   }
 
   updatePlayModeUI();

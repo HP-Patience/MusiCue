@@ -69,7 +69,7 @@ export function showToast(s) {
   toast.querySelector('.dismiss').addEventListener('click', removeSuggestion);
 
   dom.toastContainer.appendChild(toast);
-  setTimeout(removeSuggestion, 30000);
+  setTimeout(removeSuggestion, 15000);
 }
 
 function updateBellBadge() {

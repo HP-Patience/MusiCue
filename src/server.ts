@@ -115,7 +115,7 @@ if (isMain) {
 
     console.log('');
     console.log('┌───────────────────────────────────────────┐');
-    console.log('│  Claudio Server                          │');
+    console.log('│  MusiCue Server                          │');
     console.log('│  http://localhost:' + String(port).padEnd(28) + '│');
     console.log('├───────────────────────────────────────────┤');
     console.log("│  API: POST /api/chat                     │");

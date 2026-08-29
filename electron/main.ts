@@ -52,7 +52,7 @@ function startNcmApi(port: number): void {
     cwd: apiDir,
     env: { ...process.env, PORT: String(port) },
     stdio: 'pipe',
-    serviceName: 'Claudio NetEase API',
+    serviceName: 'MusiCue NetEase API',
   });
   ncmProcess.stdout?.on('data', (chunk) => {
     fs.writeSync(log, chunk);
@@ -172,9 +172,9 @@ function registerQuickInputShortcut(accelerator: string): boolean {
 function createTray(): void {
   const iconPath = path.join(resourceRoot(), 'frontend', 'icons', 'tray-icon.png');
   tray = new Tray(iconPath);
-  tray.setToolTip('Claudio');
+  tray.setToolTip('MusiCue');
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: '显示 Claudio', click: () => window?.show() },
+    { label: '显示 MusiCue', click: () => window?.show() },
     { label: '悬浮输入', click: () => toggleQuickInputWindow() },
     { type: 'separator' },
     { label: '退出', click: () => app.quit() },

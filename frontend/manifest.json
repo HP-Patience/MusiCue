@@ -1,6 +1,6 @@
 {
-  "name": "Claudio FM",
-  "short_name": "Claudio",
+  "name": "MusiCue",
+  "short_name": "MusiCue",
   "description": "Personal AI radio DJ — intelligent music curation with voice broadcast",
   "start_url": "/",
   "scope": "/",

@@ -41,7 +41,7 @@ export async function handleSkip(opts: {
   } catch (err) { console.error('[feedback] failed to write mood-rules:', (err as Error).message); }
 
   // Generate corrected recommendation
-  const prompt = `You are Claudio. The user has skipped 3+ songs in the "${safeScene}" scene. The previous direction was wrong. Suggest a completely different direction.
+  const prompt = `You are MusiCue. The user has skipped 3+ songs in the "${safeScene}" scene. The previous direction was wrong. Suggest a completely different direction.
 
 Output ONLY valid JSON:
 {

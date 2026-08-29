@@ -71,6 +71,7 @@ describe('playlist internal playback mode', () => {
     expect(audioSource).toContain('generation !== playlistModeGeneration');
     expect(audioSource).toContain('export function removePlaylistTrack');
     expect(audioSource).toContain('fromPlaylist = false');
+    expect(audioSource).toContain("if (!state.isSmartMode && queue.length === 1)");
     expect(queueSource).toContain("exitPlaylistMode({ silent: true, preserveCurrent: false })");
     expect(playlistSource).toContain('removePlaylistTrack(t.id)');
   });

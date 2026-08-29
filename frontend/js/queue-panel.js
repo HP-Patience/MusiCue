@@ -68,7 +68,7 @@ export function refreshQueuePanel() {
           state.isPlaying = false;
           dom.playBtn.innerHTML = ICONS.play;
           dom.onAir.classList.remove('active');
-          dom.nowPlaying.textContent = 'Claudio';
+          dom.nowPlaying.textContent = 'MusiCue';
           dom.waveform.classList.add('paused');
         }
       }
