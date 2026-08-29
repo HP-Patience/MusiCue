@@ -78,6 +78,18 @@ Ask for a precise song, describe a scene, or simply say how you feel. Claudio tu
       Revisit the tracks that shaped the recent listening context.
     </td>
   </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/floating-input-light.png" width="100%" alt="Planned MusiCue edge-docked quick input in light mode">
+      <strong>Floating quick input · Light</strong><br>
+      A planned edge-docked entry point for opening MusiCue and speaking to the DJ immediately.
+    </td>
+    <td width="50%" valign="top">
+      <img src="./assets/readme/floating-input-dark.png" width="100%" alt="Planned MusiCue edge-docked quick input in dark mode">
+      <strong>Floating quick input · Dark</strong><br>
+      The same planned launcher adapted to the dark listening theme.
+    </td>
+  </tr>
 </table>
 
 ## Progress & Roadmap
@@ -88,6 +100,8 @@ Ask for a precise song, describe a scene, or simply say how you feel. Claudio tu
 - [x] **Listening statistics** — Aggregate plays by week, month, quarter, or year, including top artists, top songs, listening hours, and new discoveries.
 - [x] **LLM listening reports** — Turn a selected period's statistics into a short report about habits, taste changes, and possible listening directions.
 - [ ] **Persistent taste memory** — Extract durable taste signals from each generated report, save them as listening memory, and inject that memory into future LLM prompts so recommendations improve over time.
+- [ ] **Edge-docked floating launcher** — Keep a compact floating control at the screen edge; click it to open MusiCue and start a request quickly.
+- [ ] **Automatic update checks** — Check for new MusiCue releases automatically and notify the user when an update is available.
 
 ## How It Works
 
